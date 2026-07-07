@@ -1,0 +1,3751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9DDZ1FT2TC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-9DDZ1FT2TC');
+</script>  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vedic Planner — Electional Astrology/Muhurta</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --bg: #faf7f2;
+    --bg2: #f3ede3;
+    --bg3: #ece4d5;
+    --card: #fffcf6;
+    --border: #d4c4a0;
+    --border2: #c4ae82;
+    --gold: #b8860b;
+    --gold2: #d4a017;
+    --gold-light: #f0d888;
+    --text: #2c2416;
+    --text2: #5c4a28;
+    --text3: #8c7248;
+    --indigo: #1e1b4b;
+    --indigo2: #312e81;
+    --red: #8b2020;
+    --green: #1a5c1a;
+    --shadow: rgba(44,36,22,0.12);
+    --hora-sun: #c8860a;
+    --hora-moon: #4a6080;
+    --hora-mars: #8b2020;
+    --hora-mercury: #1a5c1a;
+    --hora-jupiter: #6b4e9e;
+    --hora-venus: #2a5a5a;
+    --hora-saturn: #3a3a5c;
+    /* Tithi phase cell colours */
+    --tithi-waxing-bg:  #fdf3d0;
+    --tithi-waxing-bdr: #ddb840;
+    --tithi-full-bg:    #fde712;
+    --tithi-full-bdr:   #c8a020;
+    --tithi-waning-bg:  #e8ecf6;
+    --tithi-waning-bdr: #9aa0cc;
+    --tithi-new-bg:     #252340;
+    --tithi-new-bdr:    #46427a;
+    --tithi-new-text:   #bab4e0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 16px;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--indigo);
+    border-bottom: 1px solid #3a3470;
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    font-family: var(--font-sans);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--gold-light);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .nav-brand .brandmark {
+    width: 26px; height: 26px;
+    border: 1.5px solid var(--gold2);
+    border-radius: 50%;
+    background-color: var(--gold2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+  }
+  .nav-sep { flex: 1; }
+
+  /*FAQs & FORM Button*/
+  .faq-wrap { position: relative; }
+  #faqBtn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(212,160,23,0.35);
+    border-radius: 6px;
+    color: var(--gold-light);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+  #faqBtn:hover { background: rgba(212,160,23,0.18); }
+  #faqBtn svg { opacity: 0.7; }
+
+  /* LOCATION SEARCH */
+  .location-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .loc-icon {
+    position: absolute; left: 10px;
+    color: var(--gold2);
+    font-size: 1rem;
+    pointer-events: none;
+  }
+  #locationInput {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(212,160,23,0.35);
+    border-radius: 6px;
+    color: #e8dfc8;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    padding: 6px 10px 6px 30px;
+    width: 200px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  #locationInput::placeholder { color: rgba(232,223,200,0.45); }
+  #locationInput:focus {
+    background: rgba(255,255,255,0.11);
+    border-color: var(--gold2);
+  }
+  .loc-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: min(280px, calc(100vw - 32px));
+    background: var(--indigo);
+    border: 1px solid rgba(212,160,23,0.4);
+    border-radius: 8px;
+    overflow: hidden;
+    display: none;
+    z-index: 200;
+  }
+  .loc-dropdown.open { display: block; }
+  .loc-item {
+    padding: 9px 14px;
+    font-size: 13px;
+    color: #d4c8a8;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.15s;
+  }
+  .loc-item:hover { background: rgba(212,160,23,0.15); color: var(--gold-light); }
+  .loc-item small { display: block; color: rgba(212,200,168,0.55); font-size: 11px; margin-top: 1px; }
+  .loc-status { padding: 9px 14px; font-size: 12px; color: rgba(212,200,168,0.5); }
+
+  /* SETTINGS DROPDOWN */
+  .settings-wrap { position: relative; }
+  #settingsBtn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(212,160,23,0.35);
+    border-radius: 6px;
+    color: var(--gold-light);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+  #settingsBtn:hover { background: rgba(212,160,23,0.18); }
+  #settingsBtn svg { opacity: 0.7; }
+  .settings-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 480px;
+    background: var(--indigo);
+    border: 1px solid rgba(212,160,23,0.4);
+    border-radius: 10px;
+    padding: 0;
+    display: none;
+    z-index: 200;
+    overflow: hidden;
+  }
+  .settings-panel.open { display: block; }
+  /* Two-column grid */
+  .settings-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .settings-col {
+    padding: 16px 18px;
+  }
+  .settings-col + .settings-col {
+    border-left: 1px solid rgba(255,255,255,0.08);
+  }
+  /* Full-width bottom row for default location */
+  .settings-col-full {
+    padding: 12px 18px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .settings-section { margin-bottom: 16px; }
+  .settings-section:last-child { margin-bottom: 0; }
+  .settings-label {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold2);
+    margin-bottom: 8px;
+  }
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #d4c8a8;
+    transition: color 0.15s;
+  }
+  .radio-option:hover { color: var(--gold-light); }
+  .radio-option input[type=radio] {
+    accent-color: var(--gold2);
+    cursor: pointer;
+  }
+  .settings-sep { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 12px 0; }
+  .time-type-note {
+    font-size: 0.75rem;
+    color: rgba(212,200,168,0.45);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: grid;
+    /* Calendar flexes between 340–440px, chart flexes between 260–290px —
+       both absorb width pressure first. Hora panel has a protected 320px
+       floor (never crushed) and grows with 1fr on wide screens. */
+    grid-template-columns: minmax(340px, 440px) minmax(320px, 1fr) minmax(260px, 290px);
+    gap: 1.25rem;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 2rem;
+    align-items: start;
+  }
+
+  /* CALENDAR */
+  .calendar-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    position: sticky;
+    top: 72px;
+  }
+  .cal-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    gap: 6px;
+  }
+  .cal-header-left  { display: flex; align-items: center; gap: 6px; }
+  .cal-header-right { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  .cal-title {
+    font-family: var(--font-sans);
+    font-size: 1.20rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .cal-nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text2);
+    width: 30px; height: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+  .cal-nav-btn:hover { border-color: var(--gold2); color: var(--gold); }
+
+  /* AUSPICIOUS YOGAS BUTTON + DROPDOWN */
+  .yoga-btn-wrap { position: relative; }
+  #yogaBtn {
+    background: linear-gradient(135deg, #c8860a, #e8a820);
+    border: none;
+    border-radius: 6px;
+    color: #fff8e0;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(184,134,11,0.3);
+    transition: filter 0.15s;
+  }
+  #yogaBtn:hover { filter: brightness(1.08); }
+  #yogaBtn .yoga-chevron {
+    font-size: 9px;
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+  #yogaBtn.open .yoga-chevron { transform: rotate(180deg); }
+
+  .yoga-dropdown {
+    position: absolute;
+    top: calc(100% + 7px);
+    left: 0;
+    width: min(310px, calc(100vw - 32px));
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 6px 24px var(--shadow);
+    z-index: 150;
+    display: none;
+    overflow: hidden;
+    max-height: 480px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  .yoga-dropdown.open { display: block; }
+  .yoga-dropdown-header {
+    background: linear-gradient(135deg, #c8860a, #e8a820);
+    padding: 10px 14px 8px;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #fff8e0;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .yoga-dropdown-header .yoga-month-label {
+    font-size: 0.65rem;
+    opacity: 0.75;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .yoga-section {
+    padding: 0;
+    border-bottom: 1px solid var(--bg3);
+  }
+  .yoga-section:last-child { border-bottom: none; }
+  .yoga-section-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px 5px;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .yoga-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .yoga-desc {
+    font-size: 0.65rem;
+    color: var(--text3);
+    padding: 0 14px 5px 30px;
+    line-height: 1.4;
+  }
+  .yoga-dates {
+    padding: 0 14px 9px 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .yoga-date-chip {
+    font-size: 0.65rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .yoga-date-chip:hover {
+    background: rgba(184,134,11,0.12);
+    border-color: var(--gold2);
+    color: var(--gold);
+  }
+  .yoga-windows-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 6px 0;
+    font-size: 0.65rem;
+    font-family: var(--font-sans);
+  }
+  .yoga-windows-table thead tr {
+    background: var(--bg2);
+  }
+  .yoga-windows-table th {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 600;
+    padding: 5px 14px 4px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .yoga-windows-table th:last-child { text-align: right; }
+  .yoga-windows-table td {
+    padding: 5px 14px;
+    border-bottom: 1px solid var(--bg3);
+    vertical-align: top;
+  }
+  .yoga-windows-table tr:last-child td { border-bottom: none; }
+  .yoga-win-day {
+    color: var(--text2);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .yoga-win-time {
+    text-align: right;
+    color: var(--text3);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .yoga-win-time:hover { color: var(--gold); }
+  .yoga-win-computing {
+    padding: 10px 14px;
+    font-size: 0.65rem;
+    color: var(--text3);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .yoga-win-spinner {
+    width: 12px; height: 12px;
+    border: 1.5px solid var(--border);
+    border-top-color: var(--gold2);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .cal-dow {
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 5px 0 9px;
+    font-weight: 600;
+  }
+  .cal-day {
+    min-height: 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.65rem;
+    color: var(--text2);
+    transition: filter 0.12s, box-shadow 0.12s;
+    position: relative;
+    padding: 5px 6px 8px 6px;
+    line-height: 1;
+    border: 1px solid transparent;
+    /* default: no tithi loaded yet */
+    background: var(--bg2);    
+  }
+  /* ── Tithi phase backgrounds ───────────────────────────────────── */
+  .cal-day.tithi-waxing {
+    background: var(--tithi-waxing-bg);
+    border-color: var(--tithi-waxing-bdr);
+    color: #3a2c0a;
+  }
+  .cal-day.tithi-full {
+    background: var(--tithi-full-bg);
+    border-color: var(--tithi-full-bdr);
+    color: #3a2c0a;
+  }
+  .cal-day.tithi-waning {
+    background: var(--tithi-waning-bg);
+    border-color: var(--tithi-waning-bdr);
+    color: #2a2c40;
+  }
+  .cal-day.tithi-new {
+    background: var(--tithi-new-bg);
+    border-color: var(--tithi-new-bdr);
+    color: var(--tithi-new-text);
+  }
+  .cal-day.tithi-new {
+    background: var(--tithi-new-bg);
+    border-color: var(--tithi-new-bdr);
+    color: var(--tithi-new-text);
+  }
+  .cal-day:hover { filter: brightness(0.94); box-shadow: 0 0 0 1.5px var(--gold2); }
+  .cal-day.today  { box-shadow: 0 0 0 2px var(--gold2) !important; }
+  .cal-day.today .cal-day-num { font-weight: 700; }
+  .cal-day.selected {
+    background: var(--red) !important;
+    border-color: var(--gold2) !important;
+    color: var(--gold-light) !important;
+    box-shadow: 0 0 0 2px var(--gold2) !important;
+    filter: none !important;
+  }
+  .cal-day.other-month {
+    background: var(--bg) !important;
+    border-color: transparent !important;
+    color: var(--border2);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .cal-day-num {
+    font-size: 0.9rem;
+    line-height: 1;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .nak-label {
+    font-size: 0.65rem;
+    letter-spacing: 0;
+    line-height: 1.3;
+    font-style: italic;
+    white-space: normal;
+    word-break: break-word;
+    opacity: 0.72;
+  }
+  .tithi-label {
+    font-size: 0.65rem;
+    line-height: 1.2;
+    margin-top: 2px;
+    opacity: 0.60;
+  }
+  /* keep text readable on dark amāvasyā cells */
+  .cal-day.tithi-new .nak-label,
+  .cal-day.tithi-new .tithi-label { opacity: 1; }
+  /* selected overrides */
+  .cal-day.selected .nak-label,
+  .cal-day.selected .tithi-label { color: rgba(240,216,136,0.7); opacity: 1; }  
+
+  .yoga-none {
+    font-size: 11px;
+    color: var(--text3);
+    font-style: italic;
+    padding: 2px 14px 8px;
+  }
+  .yoga-computing {
+    padding: 18px 14px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text3);
+  }
+  .sankranti-icon {
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0.85;
+    cursor: default;
+  }
+  .cal-day.tithi-new .sankranti-icon { opacity: 0.95; }
+
+  /* MOON PHASE LEGEND */
+  .phase-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--bg3);
+    font-size: 0.65rem;
+    color: var(--text3);
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* HORA PANEL */
+  .hora-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    /* Match the sticky calendar: fill viewport height minus nav (56px) and padding (2×2rem=64px) */
+    height: calc(100vh - 56px - 4rem);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 72px;
+  }
+  .hora-header {
+    background: #17153a;
+    padding: 1.1rem 1.4rem 1rem;
+    border-bottom: 1px solid rgba(212,160,23,0.2);
+    flex-shrink: 0;
+  }
+  /* Row 1: date + location + sun times */
+  .hora-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .hora-date-title {
+    font-family: var(--font-sans);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #f5e8b0;
+    line-height: 1.2;
+  }
+  .hora-location-line {
+    font-size: 0.75rem;
+    color: rgba(232,218,180,0.7);
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .hora-sun-times {
+    text-align: right;
+    font-size: 075rem;
+    color: rgba(232,218,180,0.85);
+  }
+  .hora-sun-times strong { color: #f0c840; display: block; font-size: 1rem; font-weight: 600; }
+  .hora-sun-times .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(232,218,180,0.55); }
+  .sun-times-grid { display: flex; gap: 1.8rem; }
+
+  /* Row 2: panchanga pills */
+  .panchanga-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .panch-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.055);
+    border: 1px solid rgba(212,160,23,0.28);
+    border-radius: 6px;
+    padding: 4px 10px 4px 8px;
+    font-size: 0.65rem;
+    color: #e8ddb8;
+    cursor: default;
+    transition: background 0.15s;
+  }
+  .panch-pill:hover { background: rgba(212,160,23,0.13); }
+  .panch-pill-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(212,160,23,0.75);
+    font-family: var(--font-sans);
+  }
+  .panch-pill-icon {
+    font-size: 0.75rem;
+    line-height: 1;
+  }
+  .panch-pill-value {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f5e8b0;
+  }
+
+  /* ── RASI CHART PANEL (standalone 3rd column) ──────────────────────────── */
+  .rasi-chart-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    height: calc(100vh - 56px - 4rem);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 72px;
+  }
+  .rasi-chart-header {
+    background: #f0e8d8;   /* same as hora table thead */
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;            /* Vertically centers both elements in the row */
+    justify-content: space-between;
+  }
+  .rasi-chart-title {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #5c4020;
+  }
+  .rasi-chart-time {
+    font-size: 0.8rem;
+    color: var(--text3);
+    font-family: var(--font-sans);
+    font-weight: 500;
+  }
+  .rasi-svg-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.5rem 0.5rem;
+    overflow-y: auto;
+    background: var(--card);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  .rasi-svg-wrap::-webkit-scrollbar { width: 4px; }
+  .rasi-svg-wrap::-webkit-scrollbar-track { background: transparent; }
+  .rasi-svg-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  .rasi-svg-wrap svg {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* South Indian chart is always square — derive
+                             height deterministically from width, rather
+                             than relying on each browser's (inconsistent)
+                             SVG intrinsic-ratio-from-viewBox behavior */
+    height: auto; /* fallback for browsers predating aspect-ratio support */
+    display: block;
+  }
+  /* Panchanga info below the chart */
+  .rasi-panch-info {
+    width: 100%;
+    margin-top: 0.85rem;
+    padding-top: 0;
+    border-top: 1px solid var(--border);
+  }
+  .rasi-panch-heading {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 7px 0 5px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1px;
+  }
+  .rasi-panch-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid #ede5d4;
+  }
+  .rasi-panch-row:last-child { border-bottom: none; }
+  .rasi-panch-key {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text3);
+    font-family: var(--font-sans);
+    font-weight: 600;
+  }
+  .rasi-panch-val {
+    font-family: var(--font-sans);
+    font-size: 0.90rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+    display: inline-flex;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .rasi-panch-end {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text3);
+    margin-top: 1px;
+  }
+
+  /* HORA TABLE */
+  .hora-table-wrap {
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: auto;   /* scrollable body */
+    flex: 1;            /* fills all space below the pinned header */
+    /* Custom scrollbar — subtle, matching the warm palette */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  .hora-table-wrap::-webkit-scrollbar { width: 5px; }
+  .hora-table-wrap::-webkit-scrollbar-track { background: transparent; }
+  .hora-table-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  table.hora-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.75rem;
+  }
+  /* Sticky column headers */
+  .hora-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .hora-table thead tr { background: #f0e8d8; }
+  .hora-table th {
+    font-size: 0.75rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #5c4020;
+    font-family: var(--font-sans);
+    padding: 10px 16px;
+    text-align: left;
+    /* box-shadow replaces border-bottom — border-bottom doesn't stick with sticky */
+    box-shadow: inset 0 -2px 0 var(--border);
+  }
+  .hora-table th:last-child { text-align: right; }
+  .hora-table td {
+    padding: 9px 16px;
+    border-bottom: 1px solid #ede5d4;
+    vertical-align: middle;
+  }
+  .hora-table tr:last-child td { border-bottom: none; }
+  .hora-table tr.current-hora td { background: rgba(184,134,11,0.10); }
+  .hora-table tr.current-hora td:first-child {
+    border-left: 3px solid var(--gold2);
+    padding-left: 13px;
+  }
+  .hora-table tr.past-hora { opacity: 0.45; }
+  .hora-table tr.day-hora td { background: rgba(255,220,100,0.05); }
+  .hora-table tr.night-hora td { background: rgba(80,90,160,0.05); }
+
+  .time-cell { color: #3a2a0c; font-size: 0.75rem; white-space: nowrap; font-weight: 500; }
+
+  .hora-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .hora-planet-badge {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .hora-planet-name {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2c1e08;
+  }
+  .hora-planet-symbol {
+    font-size: 0.8rem;
+    color: var(--text3);
+    margin-left: 4px;
+  }
+  .gha-cell { text-align: right; font-size: 0.75rem; color: var(--text3); }
+  .gha-num { font-weight: 500; font-size: 0.75rem; color: var(--text2); }
+
+  .special-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 6px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+  }
+  .tag-auspicious { background: rgba(26,92,26,0.14); color: #155215; }
+  .tag-inauspicious { background: rgba(139,32,32,0.12); color: #7a1818; }
+  .hora-current {
+    background: #7cfc00;
+    border-radius: 6px;
+    padding: 4px 8px;
+  }
+
+  /* SPECIAL EVENTS ROWS */
+  .hora-table tr.event-row td {
+    padding: 10px 16px;
+    background: rgba(30,27,75,0.04);
+    border-bottom: 1px solid #e4d8c8;
+  }
+  .event-name {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #1e1b4b;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .event-sub { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #5c4020; }
+  .event-icon {
+    width: 22px; height: 22px;
+    background: var(--indigo2);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--gold-light);
+    flex-shrink: 0;
+  }
+
+  /* LOADING / ERROR */
+  .state-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+    gap: 12px;
+    color: var(--text3);
+    font-size: 15px;
+  }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold2);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-msg { color: var(--red); }
+
+  /* TIME TYPE BADGE */
+  .time-type-badge {
+    display: inline-block;
+    font-size: 0.5rem;
+    padding: 2px 9px;
+    border-radius: 4px;
+    background: rgba(212,160,23,0.18);
+    color: #f0c840;
+    border: 1px solid rgba(212,160,23,0.3);
+    vertical-align: middle;
+    font-weight: 500;
+  }
+
+  /* SET DEFAULT LOCATION */
+  .set-default-btn {
+    margin-top: 6px;
+    background: rgba(212,160,23,0.12);
+    border: 1px solid rgba(212,160,23,0.3);
+    border-radius: 5px;
+    color: var(--gold2);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .set-default-btn:hover { background: rgba(212,160,23,0.22); }
+  .set-default-note {
+    font-size: 0.8rem;
+    color: rgba(212,200,168,0.5);
+    margin-top: 4px;
+  }
+
+  .special-time-range {
+    font-size: 0.8rem;
+    color: var(--text3);
+    white-space: nowrap;
+    text-align: right;
+    padding-right: 14px;
+    font-family: var(--font-sans);
+  }
+
+  /* PANCHANGA TRANSITION ROWS — distinct from special muhurta event-row */
+  .hora-table tr.pancha-change-row td {
+    background: rgba(49,46,129,0.07);
+    border-bottom: 1px solid rgba(49,46,129,0.15);
+    border-top: 1px solid rgba(49,46,129,0.12);
+    padding: 8px 14px;
+  }
+  .pancha-change-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .pancha-change-time {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--indigo2);
+    white-space: nowrap;
+    min-width: 3.2em;
+    flex-shrink: 0;
+  }
+  .pancha-change-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(49,46,129,0.18);
+    border: 1px solid rgba(49,46,129,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--indigo2);
+    flex-shrink: 0;
+  }
+  .pancha-change-body { display: flex; flex-direction: column; gap: 1px; }
+  .pancha-change-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(49,46,129,0.6);
+    line-height: 1;
+  }
+  .pancha-change-name {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--indigo2);
+    line-height: 1.2;
+  }
+  .pancha-change-tag {
+    font-size: 0.65rem;
+    padding: 1px 7px;
+    border-radius: 3px;
+    background: rgba(49,46,129,0.1);
+    border: 1px solid rgba(49,46,129,0.25);
+    color: var(--indigo2);
+    letter-spacing: 0.04em;
+    margin-left: 6px;
+    font-family: var(--font-sans);
+  }
+
+  /* SCHEDULED EVENT ROWS — Google Calendar day-view style */
+  .hora-table tr.scheduled-event-row td {
+    padding: 0;
+    border-bottom: 1px solid var(--bg3);
+  }
+  .sched-event-block {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: var(--card);
+    cursor: pointer;
+    transition: filter 0.12s;
+  }
+  .sched-event-block:hover { filter: brightness(0.96); }
+  .sched-event-bar {
+    width: 4px;
+    flex-shrink: 0;
+    border-radius: 2px 0 0 2px;
+  }
+  .sched-event-body {
+    padding: 7px 14px;
+    flex: 1;
+  }
+  .sched-event-title {
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .sched-event-meta {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+  .sched-event-desc {
+    font-size: 11.5px;
+    color: var(--text2);
+    margin-top: 3px;
+    opacity: 0.8;
+  }
+  .sched-event-delete {
+    align-self: center;
+    padding: 0 12px;
+    font-size: 14px;
+    color: var(--text3);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+    background: none;
+    border: none;
+    line-height: 1;
+  }
+  .sched-event-block:hover .sched-event-delete { opacity: 0.6; }
+  .sched-event-delete:hover { opacity: 1 !important; color: var(--red); }
+
+  /* EVENT SCHEDULING POPUP */
+  .event-popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: transparent;
+  }
+  .event-popup {
+    position: fixed;
+    z-index: 501;
+    width: min(320px, calc(100vw - 32px));
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(44,36,22,0.18), 0 2px 8px rgba(44,36,22,0.10);
+    padding: 0;
+    overflow: hidden;
+    font-family: var(--font-sans);
+  }
+  .event-popup-header {
+    background: var(--indigo);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .event-popup-header-title {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gold-light);
+    letter-spacing: 0.03em;
+  }
+  .event-popup-hora-label {
+    font-size: 11px;
+    color: rgba(240,216,136,0.55);
+    margin-top: 1px;
+  }
+  .event-popup-close {
+    background: none;
+    border: none;
+    color: rgba(240,216,136,0.6);
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .event-popup-close:hover { color: var(--gold-light); }
+  .event-popup-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .event-popup-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .event-popup-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 500;
+  }
+  .event-popup input[type=text],
+  .event-popup input[type=time],
+  .event-popup textarea {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+    resize: none;
+  }
+  .event-popup input:focus,
+  .event-popup textarea:focus { border-color: var(--gold2); background: var(--bg); }
+  .event-popup-time-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 6px;
+  }
+  .event-popup-time-sep {
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+  }
+  .event-popup-colors {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .color-swatch {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.1s, border-color 0.1s;
+    flex-shrink: 0;
+  }
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.selected { border-color: var(--text); transform: scale(1.1); }
+  .event-popup-footer {
+    padding: 10px 16px 14px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    border-top: 1px solid var(--bg3);
+  }
+  .popup-btn {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s, color 0.15s;
+  }
+  .popup-btn-cancel {
+    background: var(--bg2);
+    border-color: var(--border);
+    color: var(--text2);
+  }
+  .popup-btn-cancel:hover { background: var(--bg3); }
+  .popup-btn-save {
+    background: var(--indigo);
+    color: var(--gold-light);
+    border-color: var(--indigo2);
+  }
+  .popup-btn-save:hover { background: var(--indigo2); }
+
+  
+
+  /* GHATIKA TAGS */
+  .ghatika-cell {
+    text-align: right;
+    white-space: nowrap;
+    padding-right: 14px;
+  }
+  .ghatika-tags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 3px;
+  }
+  .g-tag {
+    font-size: 0.50rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+  .hora-table tr.current-hora .g-tag {
+    background: rgba(184,134,11,0.12);
+    border-color: rgba(184,134,11,0.3);
+    color: var(--gold);
+  }
+  .hora-table tr.past-hora .g-tag { opacity: 0.6; }
+
+  /* TODAY BUTTON */
+  #todayBtn {
+    background: rgba(212,160,23,0.15);
+    border: 1px solid rgba(212,160,23,0.45);
+    border-radius: 6px;
+    color: var(--gold-light);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  #todayBtn:hover { background: rgba(212,160,23,0.30); color: #fff8e0; }
+
+  /* RESPONSIVE */
+  @media (max-width: 1040px) {
+    nav { padding: 0 0.85rem; gap: 0.6rem; height: auto; min-height: 52px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
+    .nav-brand { font-size: 1.1rem; }
+    .nav-brand span { display: none; }
+    .nav-sep { display: none; }
+    #locationInput { width: 130px; font-size: 13px; }
+    #todayBtn { font-size: 12px; padding: 5px 10px; }
+    #faqBtn { font-size: 12px; padding: 5px 10px; }
+    #settingsBtn { font-size: 12px; padding: 5px 10px; }
+    .settings-panel {
+      position: fixed; top: auto; bottom: 0; left: 0; right: 0;
+      width: 100% !important; border-radius: 14px 14px 0 0;
+      max-height: 85vh; overflow-y: auto;
+    }
+    .settings-cols { grid-template-columns: 1fr; }
+    .settings-col + .settings-col { border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
+    /* Mobile: single column, natural page scroll — no fixed heights */
+    .main { grid-template-columns: 1fr; padding: 0.75rem; gap: 0.75rem; }
+    .calendar-card { position: static; padding: 0.85rem 0.75rem 0.75rem; }
+    .hora-panel {
+      height: auto;        /* release fixed height on mobile */
+      position: static;    /* and sticky positioning */
+      min-height: 60vh;    /* enough to see several rows */
+    }
+    .rasi-chart-wrap {
+      height: auto;
+      position: static;
+      min-height: 800px;
+    }
+    .hora-table-wrap { max-height: 55vh; } /* constrain scroll region on mobile */
+    .cal-header { margin-bottom: 0.75rem; }
+    .cal-title { font-size: 1.15rem; }
+    .cal-nav-btn { width: 26px; height: 26px; font-size: 12px; }
+    .cal-grid { gap: 2px; }
+    .cal-dow { font-size: 9px; padding: 3px 0 5px; }
+    .cal-day { min-height: 52px; padding: 4px 4px 5px 4px; }
+    .cal-day-num { font-size: 11px; margin-bottom: 2px; }
+    .nak-label { font-size: 7.5px; }
+    .tithi-label { font-size: 7px; margin-top: 1px; }
+    .phase-legend { font-size: 10px; gap: 6px; margin-top: 0.5rem; padding-top: 0.5rem; }
+    .legend-dot { width: 7px; height: 7px; }
+    .hora-header { padding: 0.85rem 1rem 0.75rem; }
+    .hora-header-top { flex-direction: column; gap: 0.5rem; }
+    .sun-times-grid { align-self: flex-start; gap: 1.4rem; }
+    .panchanga-pills { gap: 4px; }
+    .panch-pill { padding: 3px 7px 3px 6px; font-size: 11px; }
+    .panch-pill-value { font-size: 12px; }
+    .hora-date-title { font-size: 1.15rem; }
+    .hora-location-line { font-size: 11px; margin-top: 3px; }
+    .hora-sun-times strong { font-size: 14px; }
+    .hora-sun-times .label { font-size: 9px; }
+    .hora-table th, .hora-table td { padding: 7px 10px; }
+    .hora-table th { font-size: 10px; }
+    .time-cell { font-size: 12px; }
+    .hora-planet-badge { width: 24px; height: 24px; font-size: 12px; }
+    .hora-planet-name { font-size: 0.8rem; }
+    .ghatika-cell { padding-right: 8px; }
+    .g-tag { font-size: 9px; padding: 1px 4px; }
+  }
+
+  .rasi-chart-time-input {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text3);
+  background: white;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px var(--shadow);
+  z-index: 150;
+  padding: 1px 4px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  }
+
+  .rasi-chart-time-input:hover {
+  background: var(--gold);
+  color: white;
+  }
+
+  .rasi-chart-time-input:focus {
+  border-color: var(--gold2);
+  background: var(--bg);
+  color: var(--text);
+  }
+
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="brandmark"><!--☽--></div>
+    <span>Vedic Planner</span>
+  </div>
+
+  <button id="todayBtn">Today</button>
+
+  <div class="nav-sep"></div>
+
+  <!-- FAQ & Form Button -->
+  <div class="faq-wrap">
+    <button id="faqBtn">
+      <!--<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>-->
+      FAQs & Support
+    </button>
+  </div>
+
+  <!-- Location Search -->
+  <div class="location-wrap" id="locationWrap">
+    <span class="loc-icon">⌖</span>
+    <input type="text" id="locationInput" placeholder="Search city…" autocomplete="off" spellcheck="false">
+    <div class="loc-dropdown" id="locDropdown">
+      <div class="loc-status">Type to search…</div>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings-wrap">
+    <button id="settingsBtn">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 10a2 2 0 100-4 2 2 0 000 4z"/>
+        <path fill-rule="evenodd" d="M8 0a1 1 0 011 1v.5a5.98 5.98 0 011.95.808l.354-.353a1 1 0 011.414 1.414l-.353.354A5.98 5.98 0 0113.5 5.5H14a1 1 0 010 2h-.5a5.98 5.98 0 01-.808 1.95l.353.354a1 1 0 01-1.414 1.414l-.354-.353A5.98 5.98 0 019 11.5V12a1 1 0 01-2 0v-.5a5.98 5.98 0 01-1.95-.808l-.354.353a1 1 0 01-1.414-1.414l.353-.354A5.98 5.98 0 012.5 7.5H2a1 1 0 010-2h.5a5.98 5.98 0 01.808-1.95l-.353-.354a1 1 0 011.414-1.414l.354.353A5.98 5.98 0 016 2.5V2a1 1 0 011-1z" clip-rule="evenodd"/>
+      </svg>
+      Settings
+    </button>
+    <div class="settings-panel" id="settingsPanel">
+      <div class="settings-cols">
+        <!-- LEFT column: Horā System + Time Display -->
+        <div class="settings-col">
+          <div class="settings-section">
+            <div class="settings-label">Horā System</div>
+            <label class="radio-option"><input type="radio" name="horaSystem" value="mahakala-muhurta" checked> Mahākālahorā (Muhūrta)</label>
+            <label class="radio-option"><input type="radio" name="horaSystem" value="mahakala-prasna"> Mahākālahorā (Praśna)</label>
+            <label class="radio-option"><input type="radio" name="horaSystem" value="kalahora"> Kālahorā</label>
+            <label class="radio-option"><input type="radio" name="horaSystem" value="yamahora"> Yāmahorā</label>
+            <div class="time-type-note" id="horaSystemNote">Anchored to LMT noon − 6h. 24 equal 60-min horas. Vāra lord rules hora 1.</div>
+            <div class="time-type-note" id="lmtAutoNote" style="display:none; color: rgba(212,160,23,0.8); margin-top:4px;">⚑ Uses LMT noon as anchor. Enable LMT display for consistent times.</div>
+          </div>
+          <hr class="settings-sep">
+          <div class="settings-section">
+            <div class="settings-label">Time Display</div>
+            <label class="radio-option"><input type="radio" name="timeType" value="lst" checked> Local Standard Time</label>
+            <label class="radio-option"><input type="radio" name="timeType" value="lmt"> Local Mean Time (LMT)</label>
+            <div class="time-type-note">LMT adjusts for your longitude offset from the timezone meridian.</div>
+          </div>
+        </div>
+        <!-- RIGHT column: Ayanāmsa -->
+        <div class="settings-col">
+          <div class="settings-section">
+            <div class="settings-label">Ayanāmsa</div>
+            <label class="radio-option"><input type="radio" name="ayanamsa" value="true-chitrapaksa" checked> True Chitrapaksa</label>
+            <label class="radio-option"><input type="radio" name="ayanamsa" value="lahiri"> Lahiri</label>
+            <label class="radio-option"><input type="radio" name="ayanamsa" value="raman"> Raman</label>
+            <!--<label class="radio-option"><input type="radio" name="ayanamsa" value="true-pushya"> True Pushya</label>-->
+          </div>
+          <div class="settings-label">Default Ayanāṃśa</div>
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <div class="set-default-note" style="margin:0;">Saved: <span id="defaultAyanamsaName" style="text-transform: capitalize;">lahiri</span></div>
+            <button class="set-default-btn" id="setDefaultAyanamsaBtn">⚑ Set current as default</button>
+            <div class="set-default-note" id="defaultAyanamsaSavedMsg" style="display:none; color:rgba(80,200,80,0.9); margin:0;">✓ Saved</div>
+          </div>
+        </div>
+      </div>
+      <!-- Full-width bottom: Default Location -->
+      <div class="settings-col-full">
+        <div class="settings-label">Default Location</div>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div class="set-default-note" id="defaultLocNote" style="margin:0;">Saved: <span id="defaultLocName">New Delhi</span></div>
+          <button class="set-default-btn" id="setDefaultLocBtn">⚑ Set current as default</button>
+          <div class="set-default-note" id="defaultSavedMsg" style="display:none; color:rgba(80,200,80,0.9); margin:0;">✓ Saved</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- CALENDAR -->
+  <div class="calendar-card">
+    <div class="cal-header">
+      <!-- Left: Auspicious Yogas button -->
+      <div class="cal-header-left">
+        <div class="yoga-btn-wrap">
+          <button id="yogaBtn">✦ Auspicious Yogas <span class="yoga-chevron">▾</span></button>
+          <div class="yoga-dropdown" id="yogaDropdown">
+            <div class="yoga-dropdown-header">
+              <span>COMING SOON</span>
+              <span class="yoga-month-label" id="yogaMonthLabel"></span>
+            </div>
+            <div id="yogaList"><div class="yoga-computing">Loading…</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Centre: Month Year title -->
+      <div class="cal-title" id="calTitle"></div>
+      <!-- Right: prev / next nav -->
+      <div class="cal-header-right">
+        <button class="cal-nav-btn" id="prevMonth">&#8249;</button>
+        <button class="cal-nav-btn" id="nextMonth">&#8250;</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="phase-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#f0d060; border:1px solid #c8a820;"></div> Śukla (Waxing)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e8c000;"></div> Pūrṇimā (Full)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c8c0a8; border:1px solid #a09070;"></div> Kṛṣṇa (Waning)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3a3448;"></div> Amāvasyā (New)</div>
+      <div class="legend-item"><span style="font-size:11px; line-height:1;">☀</span>&nbsp;Saṅkrānti</div>
+    </div>
+  </div>
+
+  <!-- HORA PANEL -->
+  <div class="hora-panel" id="horaPanel">
+    <div class="state-overlay" id="horaLoading">
+      <div class="spinner"></div>
+      <span>Select a date and location</span>
+    </div>
+  </div>
+
+  <!-- SIDEREAL CHART PANEL -->
+  <div class="rasi-chart-wrap" id="rasiChartWrap">
+    <div class="rasi-chart-header">
+      <div class="rasi-chart-title">
+        <span>Sidereal Horoscope</span>
+      </div>  
+        <input type="time" id="rasiChartTimeInput" class="rasi-chart-time-input">
+    </div>
+    <div class="rasi-svg-wrap" id="rasiSvgWrap">
+      <div style="color:rgba(212,200,168,0.4);font-size:12px;padding:10px 0;">Select a date…</div>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ & JOTFORM POPUP WINDOW -->
+<div class="faq-popup-overlay" id="faqPopupOverlay" style="display:none; position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px);"></div>
+
+<div class="faq-popup" id="faqPopup" style="display:none; position: fixed; z-index: 601; width: min(650px, calc(100vw - 20px)); max-height: 85vh; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 40px rgba(44,36,22,0.25); top: 50%; left: 50%; transform: translate(-50%, -50%); flex-direction: column; overflow: hidden; font-family: var(--font-sans);">
+  
+  <div class="faq-popup-header" style="background: var(--indigo); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(212,160,23,0.2);">
+    <div style="font-family: var(--font-sans); font-size: 1.1rem; font-weight: 600; color: var(--gold-light); letter-spacing: 0.03em;">Help & Frequently Asked Questions</div>
+    <button id="faqPopupClose" style="background: none; border: none; color: rgba(240,216,136,0.6); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 4px; transition: color 0.15s;">✕</button>
+  </div>
+
+  <div class="faq-popup-body" style="padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; scrollbar-width: thin; scrollbar-color: var(--border2) transparent;">
+    
+    <!-- Quick FAQs -->
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold2); font-weight: 600; margin-bottom: 4px;">Quick FAQs</div>
+      
+      <details style="background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 10px; cursor: pointer;">
+        <summary style="font-weight: 600; font-size: 0.9rem; color: var(--text);">What is the difference between LST and LMT?</summary>
+        <p style="font-size: 0.85rem; color: var(--text2); margin-top: 6px; line-height: 1.4;">LST (Local Standard Time) follows your regional clock. LMT (Local Mean Time) adjusts explicitly for your precise geographic longitude offset from the timezone meridian, which alters boundary timings.</p>
+      </details>
+
+      <details style="background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 10px; cursor: pointer;">
+        <summary style="font-weight: 600; font-size: 0.9rem; color: var(--text);">How does Vedic Planner data differ from data on other softwares?</summary>
+        <p style="font-size: 0.85rem; color: var(--text2); margin-top: 6px; line-height: 1.4;">Vedic Planner is a free to use tool and is being designed to remain free forever. Paid softwares use Swiss Ephemeris which requires licensing fees but Vedic Planner uses open source astronomical libraries for our calculations which is accurate within sub-arcminute of Swiss Ephemeris for 100 year span.</p>
+      </details>
+
+      <details style="background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 10px; cursor: pointer;">
+        <summary style="font-weight: 600; font-size: 0.9rem; color: var(--text);">What is the definition of sunrise and sunset used in Vedic Planner?</summary>
+        <p style="font-size: 0.85rem; color: var(--text2); margin-top: 6px; line-height: 1.4;">For calculation purposes, sunrise and sunset tracks the moment the upper rim of the sun is tangent to an unobstructed horizon at sea level.</p>
+      </details>        
+     
+    </div>
+
+    <hr style="border: none; border-top: 1px solid var(--bg3); margin: 8px 0;">
+
+    <!-- Jotform Container -->
+    <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+      <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold2); font-weight: 600;">Submit a Request or Feedback</div>
+      <div style="width: 100%; min-height: 300px; background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
+        <!-- Replace src with your actual Jotform URL -->
+        <iframe id="faqJotform" src="https://form.jotform.com/261733086958065" style="width: 100%; height: 350px; border: none;" allow="geolocation; microphone; camera"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT SCHEDULING POPUP -->
+<div class="event-popup-overlay" id="eventPopupOverlay" style="display:none;"></div>
+<div class="event-popup" id="eventPopup" style="display:none;">
+  <div class="event-popup-header">
+    <div>
+      <div class="event-popup-header-title">Schedule Event - COMING SOON</div>
+      <div class="event-popup-hora-label" id="popupHoraLabel"></div>
+    </div>
+    <button class="event-popup-close" id="popupClose">✕</button>
+  </div>
+  <div class="event-popup-body">
+    <div class="event-popup-field">
+      <label class="event-popup-label">Title</label>
+      <input type="text" id="popupTitle" placeholder="Event title…" maxlength="80">
+    </div>
+    <div class="event-popup-field">
+      <label class="event-popup-label">Time</label>
+      <div class="event-popup-time-row">
+        <input type="time" id="popupStartTime">
+        <span class="event-popup-time-sep">→</span>
+        <input type="time" id="popupEndTime">
+      </div>
+    </div>
+    <div class="event-popup-field">
+      <label class="event-popup-label">Description (optional)</label>
+      <textarea id="popupDesc" rows="2" placeholder="Notes…"></textarea>
+    </div>
+    <div class="event-popup-field">
+      <label class="event-popup-label">Colour</label>
+      <div class="event-popup-colors" id="popupColors"></div>
+    </div>
+  </div>
+  <div class="event-popup-footer">
+    <button class="popup-btn popup-btn-cancel" id="popupCancel">Cancel</button>
+    <button class="popup-btn popup-btn-save"   id="popupSave">Save event</button>
+  </div>
+</div>
+
+
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const DEFAULT_LOCATION = { name: 'New Delhi', lat: 28.6139, lng: 77.2090, tz: 'Asia/Kolkata', tzOffset: 5.5 };
+const DEFAULT_AYANAMSA = 'true-chitrapaksa';
+function loadDefaultLocation() {
+  try {
+    const saved = localStorage.getItem('horadarpan_default_loc');
+    return saved ? JSON.parse(saved) : DEFAULT_LOCATION;
+  } catch { return DEFAULT_LOCATION; }
+}
+function loadDefaultAyanamsa() {
+  try {
+    const saved = localStorage.getItem('horadarpan_default_ayanamsa');
+    return saved ? saved : DEFAULT_AYANAMSA;
+  } catch { return DEFAULT_AYANAMSA; }
+}
+const state = {
+  location: loadDefaultLocation(),
+  ayanamsa: loadDefaultAyanamsa(),
+  horaSystem: 'mahakala-muhurta',
+  timeType: 'lst',
+  viewYear: 0,   // set just below, once state.location is known
+  viewMonth: 0,  // set just below, once state.location is known
+  selectedDate: null,
+  horaData: null,
+  userSetTime: false, // true only once the user manually edits the time picker;
+                       // stays false for our own programmatic pre-fills, so
+                       // fetchSupabaseAstroData knows whether to keep using a
+                       // live "now at location" value or honor a fixed time.
+  panchangaCache: {},          // keyed by "YYYY-MM-DD" → panchanga data from month-panchanga-engine
+  monthPanchangaFetching: new Set(), // tracks "YYYY-MM" keys currently in-flight
+  events: loadStoredEvents()
+};
+{
+  const initLocNow = getNowAtLocation(state.location.tzOffset);
+  state.viewYear = initLocNow.year;
+  state.viewMonth = initLocNow.month;
+}
+
+// ─── EVENT PERSISTENCE ────────────────────────────────────────────────────────
+function loadStoredEvents() {
+  try { return JSON.parse(localStorage.getItem('horadarpan_events') || '[]'); }
+  catch { return []; }
+}
+function saveEvents() {
+  try { localStorage.setItem('horadarpan_events', JSON.stringify(state.events)); }
+  catch {}
+}
+// dateKey: 'YYYY-MM-DD' string for a JS Date
+function dateKey(date) {
+  const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+function eventsForDate(date) {
+  const k = dateKey(date);
+  return state.events.filter(e => e.dateKey === k);
+}
+
+// ─── PLANET CONFIG ───────────────────────────────────────────────────────────
+const PLANETS = [
+  { name: 'Sun',    symbol: '☉', color: '#c8860a', bg: 'rgba(200,134,10,0.12)', gha: 1 },
+  { name: 'Moon',   symbol: '☽', color: '#4a6080', bg: 'rgba(74,96,128,0.12)', gha: 2 },
+  { name: 'Mars',   symbol: '♂', color: '#8b2020', bg: 'rgba(139,32,32,0.12)', gha: 3 },
+  { name: 'Mercury',symbol: '☿', color: '#1a5c1a', bg: 'rgba(26,92,26,0.12)', gha: 4 },
+  { name: 'Jupiter',symbol: '♃', color: '#6b4e9e', bg: 'rgba(107,78,158,0.12)', gha: 5 },
+  { name: 'Venus',  symbol: '♀', color: '#2a5a5a', bg: 'rgba(42,90,90,0.12)', gha: 6 },
+  { name: 'Saturn', symbol: '♄', color: '#3a3a5c', bg: 'rgba(58,58,92,0.12)', gha: 7 },
+];
+// Chaldean (slowest to fastest): Saturn, Jupiter, Mars, Sun, Venus, Mercury, Moon
+const CHALDEAN = [6, 4, 2, 0, 5, 3, 1]; // indices into PLANETS array (saturn,jupiter,mars,sun,venus,mercury,moon)
+
+// Day lord: Sun=0, Moon=1, Mars=2, Mercury=3, Jupiter=4, Venus=5, Saturn=6
+// JS getDay(): 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+const DAY_LORD_IDX = [0, 1, 2, 3, 4, 5, 6]; // planet index matching day of week
+
+// Hora sequence from sunrise repeats every 7, starting with day lord
+// Chaldean hour order going forward
+function getHoraLord(dayOfWeek, horaIndex) {
+  // Day lord planet index in PLANETS array
+  const dayLords = [0, 1, 2, 3, 4, 5, 6]; // Sun,Mon,Tue,Wed,Thu,Fri,Sat -> Sun,Moon,Mars,Mercury,Jupiter,Venus,Saturn
+  const dayLordPlanetIdx = dayLords[dayOfWeek];
+  // Find position of day lord in chaldean order
+  const startPos = CHALDEAN.indexOf(dayLordPlanetIdx);
+  return PLANETS[CHALDEAN[(startPos + horaIndex) % 7]];
+}
+
+// ─── CORE MATH UTILITY ────────────────────────────────────────────────────────
+// mod360 is still used when unpacking Supabase sidereal values into the chart renderer.
+// All planet longitude computation has moved to the Supabase Astro Engine (astro-engine-v2.ts).
+
+function mod360(x) { return ((x % 360) + 360) % 360; }
+
+// ─── NAKSHATRA (27 divisions of 360°, 13°20' each) ───────────────────────────
+const NAKSHATRA_NAMES = [
+  'Aśvinī','Bharaṇī','Kṛttikā','Rohiṇī','Mṛgaśīrā','Ārdrā','Punarvasū',
+  'Puṣya','Āśleṣā','Maghā','Pūrva Phalg.','Uttara Phalg.','Hasta',
+  'Citrā','Svātī','Viśākhā','Anurādhā','Jyeṣṭhā','Mūla',
+  'Pūrvāṣāḍhā','Uttarāṣāḍhā','Śravaṇa','Dhaniṣṭhā','Śatabhiṣā',
+  'Pūrva Bhādra','Uttara Bhādra','Revatī'
+];
+const NAKSHATRA_SHORT = [
+  'Aśvi','Bhar','Kṛtt','Rohi','Mṛga','Ārdr','Puna',
+  'Puṣy','Āśle','Magh','PPha','UPha','Hast',
+  'Citr','Svāt','Viśā','Anur','Jyeṣ','Mūla',
+  'PĀṣā','UĀṣā','Śrav','Dhan','Śata',
+  'PBhā','UBhā','Revā'
+];
+
+function getNakshatraIndex(moonSid) {
+  return Math.min(26, Math.floor(moonSid / (360 / 27)));
+}
+
+// ─── TITHI (30 tithis: each 12° of Moon-Sun elongation) ──────────────────────
+const TITHI_NAMES = [
+  'Pratipadā','Dvitīyā','Tṛtīyā','Caturthī','Pañcamī',
+  'Ṣaṣṭhī','Saptamī','Aṣṭamī','Navamī','Daśamī',
+  'Ekādaśī','Dvādaśī','Trayodaśī','Caturdaśī','Pūrṇimā', // Śukla 1-15
+  'Pratipadā','Dvitīyā','Tṛtīyā','Caturthī','Pañcamī',
+  'Ṣaṣṭhī','Saptamī','Aṣṭamī','Navamī','Daśamī',
+  'Ekādaśī','Dvādaśī','Trayodaśī','Caturdaśī','Amāvasyā'  // Kṛṣṇa 1-15
+];
+const TITHI_SHORT = [
+  'Śu-1','Śu-2','Śu-3','Śu-4','Śu-5','Śu-6','Śu-7','Śu-8','Śu-9','Śu-10',
+  'Śu-11','Śu-12','Śu-13','Śu-14','Pūrṇ',
+  'Kṛ-1','Kṛ-2','Kṛ-3','Kṛ-4','Kṛ-5','Kṛ-6','Kṛ-7','Kṛ-8','Kṛ-9','Kṛ-10',
+  'Kṛ-11','Kṛ-12','Kṛ-13','Kṛ-14','Amāv'
+];
+
+function getTithiIndex(moonSid, sunSid) {
+  const elongation = mod360(moonSid - sunSid);
+  return Math.floor(elongation / 12);
+}
+
+// ─── YOGA (27 yogas: each 13°20' of Sun+Moon sidereal longitude sum) ──────────
+const YOGA_NAMES = [
+  'Viṣkambha','Prīti','Āyuṣmān','Saubhāgya','Śobhana',
+  'Atigaṇḍa','Sukarman','Dhṛti','Śūla','Gaṇḍa',
+  'Vṛddhi','Dhruva','Vyāghāta','Harṣana','Vajra',
+  'Siddhi','Vyatīpāta','Varīyān','Parigha','Śiva',
+  'Siddha','Sādhya','Śubha','Śukla','Brahma',
+  'Indra','Vaidhṛti'
+];
+function getYogaIndex(moonSid, sunSid) {
+  return Math.floor(mod360(moonSid + sunSid) / (360 / 27));
+}
+
+// ─── KARANA (60 karanas: each 6° of Moon-Sun elongation = half a tithi) ───────
+const KARANA_NAMES = [
+  'Bava','Bālava','Kaulava','Taitila','Gara','Vaṇija','Viṣṭi',
+  'Śakuni','Catuṣpāda','Nāga','Kiṃstughna'
+];
+function getKaranaIndex(moonSid, sunSid) {
+  const elongation = mod360(moonSid - sunSid);
+  const k = Math.floor(elongation / 6);
+  // k=0 is Kiṃstughna (fixed), k=57-59 are Śakuni, Catuṣpāda, Nāga (fixed)
+  if (k === 0) return 10; // Kiṃstughna
+  if (k >= 57) return 7 + (k - 57); // Śakuni=7, Catuṣpāda=8, Nāga=9
+  return (k - 1) % 7; // repeating Bava…Viṣṭi
+}
+
+// Phase bucket from tithi for colour coding
+function getPhaseFromTithi(tithiIdx) {
+  if (tithiIdx === 14) return 'full';        // Pūrṇimā
+  if (tithiIdx === 29) return 'new';         // Amāvasyā
+  if (tithiIdx < 14)  return 'waxing';      // Śukla pakṣa
+  return 'waning';                           // Kṛṣṇa pakṣa
+}
+
+function getPhaseColor(phase) {
+  const map = { waxing: '#f0d060', full: '#e8c000', waning: '#c8c0a8', new: '#3a3448' };
+  return map[phase] || '#888';
+}
+
+// ─── SANKRANTI DETECTION ──────────────────────────────────────────────────────
+// Reads the sankranti field returned by month-panchanga-engine for each date.
+// The edge function checks the Sun's rāśi at local day-start vs. day-end using
+// SearchRiseSet — no local computation needed or performed here.
+// Returns null while the month fetch is still in flight; renderDay omits the ☀
+// icon for that cell until data arrives.
+const RASI_NAMES_FULL = [
+  'Meṣa','Vṛṣabha','Mithuna','Karkaṭa','Siṃha','Kanyā',
+  'Tulā','Vṛścika','Dhanuṣa','Makara','Kumbha','Mīna'
+];
+
+function getSankranti(date) {
+  const cached = state.panchangaCache[dateKey(date)];
+  if (cached?._source === 'server') return cached.sankranti ?? null;
+  return null;
+}
+
+// ─── VARA (weekday names) ─────────────────────────────────────────────────────
+const VARA_NAMES = ['Ravi-vāra','Soma-vāra','Maṅgala-vāra','Budha-vāra','Guru-vāra','Śukra-vāra','Śani-vāra'];
+
+// ─── TRANSITION END-TIME FORMATTER ───────────────────────────────────────────
+// Reads the ISO local timestamp from data.transitions (e.g. "2026-06-04T14:32:17+05:30")
+// and formats it as "ends 14:32" or "ends 14:32, 04 Jun" when the transition falls
+// on a different calendar day than the selected date.
+function formatTransitionEnd(isoLocal, selectedDate) {
+  if (!isoLocal) return '—';
+  // Parse the local time directly from the ISO string (HH:MM portion)
+  const timePart = isoLocal.slice(11, 16); // "14:32"
+  const datePart = isoLocal.slice(0, 10);  // "2026-06-04"
+  const selPart  = selectedDate
+    ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth()+1).padStart(2,'0')}-${String(selectedDate.getDate()).padStart(2,'0')}`
+    : null;
+  if (!selPart || datePart === selPart) return `ends ${timePart}`;
+  const [, , dd] = datePart.split('-');
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(datePart.slice(5,7)) - 1];
+  return `ends ${timePart}, ${dd} ${mo}`;
+}
+
+// ─── PANCHANGA FROM SUPABASE DATA ─────────────────────────────────────────────
+// Derives all five panchanga limbs directly from state.supabaseAstroData.
+// No local ephemeris computation — sun and moon sidereal longitudes come from
+// the edge function (Swiss Ephemeris precision via astronomy-engine).
+// Returns null when no Supabase data is cached yet (calendar will show placeholder).
+function panchangaFromCache() {
+  const sb = state.supabaseAstroData;
+  if (!sb?.coordinates?.sun?.sidereal || !sb?.coordinates?.moon?.sidereal) return null;
+  const moonSid   = mod360(sb.coordinates.moon.sidereal);
+  const sunSid    = mod360(sb.coordinates.sun.sidereal);
+  const nakIdx    = getNakshatraIndex(moonSid);
+  const tithiIdx  = getTithiIndex(moonSid, sunSid);
+  const yogaIdx   = getYogaIndex(moonSid, sunSid);
+  const karanaIdx = getKaranaIndex(moonSid, sunSid);
+  const phase     = getPhaseFromTithi(tithiIdx);
+  return {
+    nakIdx,    nakName:   NAKSHATRA_NAMES[nakIdx],  nakShort: NAKSHATRA_SHORT[nakIdx],
+    tithiIdx,  tithiName: TITHI_NAMES[tithiIdx],   tithiShort: TITHI_SHORT[tithiIdx],
+    yogaIdx,   yogaName:  YOGA_NAMES[yogaIdx],
+    karanaIdx, karanaName:KARANA_NAMES[karanaIdx],
+    phase,     phaseColor:getPhaseColor(phase)
+  };
+}
+
+// Calendar grid panchanga — reads exclusively from state.panchangaCache which is
+// populated by fetchMonthPanchanga() (month-panchanga-engine edge function).
+// While the month fetch is in flight, returns a loading placeholder with
+// phase:null so renderDay can style the cell neutrally and show '…' labels.
+// No local Meeus fallback — calendar shows only server-computed data.
+function getPanchanga(date) {
+  const cached = state.panchangaCache[dateKey(date)];
+  if (cached) return cached;
+  // Loading placeholder — phase:null signals renderDay to use neutral styling
+  return {
+    phase: null, tithiShort: '…', nakShort: '…',
+    tithiIdx: -1, nakIdx: -1, yogaIdx: -1, karanaIdx: -1,
+    tithiName: '…', nakName: '…', yogaName: '…', karanaName: '…',
+    _source: 'loading'
+  };
+}
+
+// For the hora panel — returns panchanga at sunrise for the given date.
+// Reads from Supabase cache (panchangaFromCache) which is evaluated at the
+// request time on the selected date. For any other date, returns null and
+// the hora panel will show '—' labels rather than incorrect local estimates.
+function getPanchangaAtSunrise(date, sunriseSec, tzOff) {
+  if (state.selectedDate && date.toDateString() === state.selectedDate.toDateString()) {
+    return panchangaFromCache() || null;
+  }
+  return null;
+}
+// Formats a JS Date as "YYYY-MM-DDTHH:MM:SS+HH:MM" in local civil time,
+// matching the Postman example: "2026-06-03T16:25:00+05:30"
+function formatDateWithTzOffset(date, tzOffsetHours) {
+  // Build a local-time Date by shifting UTC by the tz offset
+  const localMs = date.getTime() + tzOffsetHours * 3600000;
+  const local   = new Date(localMs);
+  const pad2    = n => String(n).padStart(2, '0');
+  const Y  = local.getUTCFullYear();
+  const Mo = pad2(local.getUTCMonth() + 1);
+  const D  = pad2(local.getUTCDate());
+  const H  = pad2(local.getUTCHours());
+  const Mi = pad2(local.getUTCMinutes());
+  const S  = pad2(local.getUTCSeconds());
+  // tz sign and parts
+  const sign    = tzOffsetHours >= 0 ? '+' : '-';
+  const absOff  = Math.abs(tzOffsetHours);
+  const offH    = pad2(Math.floor(absOff));
+  const offM    = pad2(Math.round((absOff % 1) * 60));
+  return `${Y}-${Mo}-${D}T${H}:${Mi}:${S}${sign}${offH}:${offM}`;
+}
+
+
+// ─── SPECIAL MUHURTAS ─────────────────────────────────────────────────────────
+function getSpecialMuhurtas(sunriseSec, sunsetSec, date) {
+  const specials = [];
+  const dayArc = sunsetSec - sunriseSec;
+
+  // The 24h cycle is always divided into 30 muhurtas: 15 spanning the day
+  // (sunrise→sunset) and 15 spanning the night (sunset→next sunrise).
+  // Each muhurta's length is therefore season-dependent — exactly 48 min
+  // only at the equinox, when day and night are equal. Night length is
+  // approximated as (24h − dayArc), standard panchanga practice and
+  // accurate to within ~1-2 min even near the solstices (the small
+  // discrepancy comes from day length changing slightly between today's
+  // and tomorrow's sunrise, which would require an extra API call to
+  // resolve exactly).
+  const nightArc = 86400 - dayArc;
+  const dayMuhurtaLen   = dayArc / 15;
+  const nightMuhurtaLen = nightArc / 15;
+
+  // Brahma Muhūrta and Prātaḥ Sandhyā are the 14th and 15th (last two)
+  // night-muhurtas — the two muhurta-lengths immediately preceding
+  // sunrise, back-to-back with no gap or overlap.
+  specials.push({ at: sunriseSec - 2 * nightMuhurtaLen, name: 'Brahma Muhūrta', end: sunriseSec - 1 * nightMuhurtaLen, type: 'auspicious', sub: 'Auspicious' });
+  // Pre-dawn meditation
+  specials.push({ at: sunriseSec - 3 * nightMuhurtaLen/2, name: 'Pratah Sandhya', end: sunriseSec, type: 'neutral', sub: '' });
+  // Abhijit Muhūrta: the 8th of the 15 day-muhurtas — centered exactly on
+  // local midday, spanning half a day-muhurta-length on either side.
+  const midday = sunriseSec + dayArc / 2;
+  const halfDayMuhurta = dayMuhurtaLen / 2;
+  specials.push({ at: midday - halfDayMuhurta, name: 'Abhijit Muhūrta', end: midday + halfDayMuhurta, type: 'auspicious', sub: 'Auspicious' });
+  // Rahu Kala: unrelated to the 30-muhurta system — daytime divided into
+  // 8 equal parts; slot varies by weekday. (Unchanged.)
+  const rahuSlot = [7, 1, 6, 4, 5, 3, 2][date.getDay()]; // Sun-Sat (0-based)
+  const slotDur = dayArc / 8;
+  specials.push({ at: sunriseSec + rahuSlot * slotDur, name: 'Rāhu Kāla', end: sunriseSec + (rahuSlot+1) * slotDur, type: 'inauspicious', sub: 'Inauspicious' });
+  return specials;
+}
+
+// ─── LMT OFFSET ──────────────────────────────────────────────────────────────
+function getLMTOffset(lng, tzOffsetHours) {
+  // LMT offset from LST in seconds
+  const lmtOffsetHours = lng / 15 - tzOffsetHours;
+  return lmtOffsetHours * 3600;
+}
+
+// ─── TIME FORMATTING ─────────────────────────────────────────────────────────
+function secToTime(sec, lmtAdjust = 0) {
+  let s = sec + lmtAdjust;
+  s = ((s % 86400) + 86400) % 86400;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+// ─── HORA CALCULATION ────────────────────────────────────────────────────────
+// sunriseSec and sunsetSec are in LOCAL STANDARD TIME seconds-since-midnight.
+// lmtOffsetSec is added only at display time, never here.
+// All four systems produce an array of { start, end, lord, index, isDay }.
+
+function calculateHoras(sunriseSec, sunsetSec, date, horaSystem, lmtOffsetSec) {
+  const horas = [];
+  const dow = date.getDay();
+
+  // ── (A) KĀLAHORĀ ────────────────────────────────────────────────────────────
+  // 24 perfectly equal 60-min horas. Hora 0 starts at sunrise.
+  // Sunset is ignored. Day lord rules the first hora.
+  if (horaSystem === 'kalahora') {
+    for (let i = 0; i < 24; i++) {
+      const start = sunriseSec + i * 3600;
+      const end   = start + 3600;
+      // isDay: within same-day sunrise→sunset window (purely cosmetic tint)
+      const isDay = start >= sunriseSec && start < sunsetSec;
+      horas.push({ start, end, lord: getHoraLord(dow, i), index: i, isDay });
+    }
+
+  // ── (B) MAHĀKĀLAHORĀ (MUHŪRTA) ──────────────────────────────────────────────
+  // Anchored to solar noon in LMT — the moment the Sun is astronomically highest
+  // at the location's exact longitude. Solar noon ≠ 12:00 civil time unless you
+  // are exactly on the timezone meridian.
+  //
+  // Relationship: LMT = LST + lmtOffsetSec
+  //   → lmtOffsetSec = (lng/15 - tzOffsetHours) × 3600
+  //   → For Delhi (77.209°E, IST +5.5h):  lmtOffsetSec = (77.209/15 - 5.5)×3600 ≈ −1249 s
+  //      meaning Delhi LMT is ~21 min BEHIND IST (solar noon falls at ~12:22 IST)
+  //
+  // Solar noon in LST:
+  //   noonLMT = 43200 s  →  noonLST = noonLMT − lmtOffsetSec = 43200 − lmtOffsetSec
+  //   Delhi: noonLST = 43200 − (−1249) = 44449 s ≈ 12:20:49 IST  ✓
+  //
+  // Hora cycle anchor = noonLST − 6 h = 6 hours before solar noon expressed in LST.
+  } else if (horaSystem === 'mahakala-muhurta') {
+    const noonLST   = 43200 - lmtOffsetSec;          // solar noon in LST seconds
+    const anchorLST = noonLST - 6 * 3600;             // cycle start: 6h before solar noon
+    for (let i = 0; i < 24; i++) {
+      const start = anchorLST + i * 3600;
+      const end   = start + 3600;
+      const isDay = start >= sunriseSec && start < sunsetSec;
+      horas.push({ start, end, lord: getHoraLord(dow, i), index: i, isDay });
+    }
+
+  // ── (C) MAHĀKĀLAHORĀ (PRAŚNA) ───────────────────────────────────────────────
+  // Anchored to civil noon in LST — 12:00:00 on the clock, i.e. the timezone
+  // meridian's solar noon, NOT the location's own solar noon.
+  // This is constant for everyone in the same timezone regardless of longitude.
+  //
+  // Cycle anchor = 12:00:00 LST − 6 h = 06:00:00 LST exactly.
+  // For IST: always 06:00:00 IST whether you are in Delhi, Mumbai, or Kolkata.
+  } else if (horaSystem === 'mahakala-prasna') {
+    const anchorLST = 43200 - 6 * 3600;               // 06:00:00 LST, fixed
+    for (let i = 0; i < 24; i++) {
+      const start = anchorLST + i * 3600;
+      const end   = start + 3600;
+      const isDay = start >= sunriseSec && start < sunsetSec;
+      horas.push({ start, end, lord: getHoraLord(dow, i), index: i, isDay });
+    }
+
+  // ── (D) YĀMAHORĀ ────────────────────────────────────────────────────────────
+  // Day divided into 12 unequal horas (sunrise→sunset) and night into 12 unequal
+  // horas (sunset→next sunrise). Durations expand/compress with actual daylight.
+  // The next sunrise is approximated as sunriseSec + 86400 (same time next day).
+  } else if (horaSystem === 'yamahora') {
+    const dayArc   = sunsetSec - sunriseSec;           // actual daylight seconds
+    const nightArc = 86400 - dayArc;                   // actual night seconds
+    const dayDur   = dayArc / 12;
+    const nightDur = nightArc / 12;
+    // 12 day horas
+    for (let i = 0; i < 12; i++) {
+      const start = sunriseSec + i * dayDur;
+      horas.push({ start, end: start + dayDur, lord: getHoraLord(dow, i), index: i, isDay: true });
+    }
+    // 12 night horas — continue horaIndex from 12
+    for (let i = 0; i < 12; i++) {
+      const start = sunsetSec + i * nightDur;
+      horas.push({ start, end: start + nightDur, lord: getHoraLord(dow, 12 + i), index: 12 + i, isDay: false });
+    }
+    horas.sort((a, b) => a.start - b.start);
+  }
+
+  return horas;
+}
+
+// ─── GHATIKA CALCULATION ─────────────────────────────────────────────────────
+// The 24h cycle is divided into 60 ghatikas: 30 spanning the day (sunrise→
+// sunset) and 30 spanning the night (sunset→next sunrise) — the same
+// day/night split used for muhurtas, just at twice the resolution (60
+// ghatikas vs. 30 muhurtas). Each ghatika's length is therefore season-
+// dependent: dayArc/30 in daytime, nightArc/30 at night — exactly 24 min
+// only at the equinox, when day and night are equal. Night length uses the
+// same (24h − dayArc) approximation as muhurta, for the same reason (exact
+// night length needs tomorrow's sunrise, a few seconds to ~1-2 min off).
+// horaStart/horaEnd are raw LST seconds — post-midnight horas have values > 86400.
+// Ghatika starts are kept in the same raw space (no modulo) so G31-G60 which
+// cross midnight (gStart > 86400) correctly match those post-midnight hora windows.
+function getGhatikas(sunriseSec, sunsetSec, horaStart, horaEnd) {
+  const dayArc = sunsetSec - sunriseSec;
+  const nightArc = 86400 - dayArc;
+  const dayGhatikaLen = dayArc / 30;
+  const nightGhatikaLen = nightArc / 30;
+  const ghatikas = [];
+  for (let n = 1; n <= 60; n++) {
+    const isDayGhatika = n <= 30;
+    const gStart = isDayGhatika
+      ? sunriseSec + (n - 1) * dayGhatikaLen
+      : sunsetSec + (n - 31) * nightGhatikaLen;
+    const gLen = isDayGhatika ? dayGhatikaLen : nightGhatikaLen;
+    if (gStart >= horaStart && gStart < horaEnd) ghatikas.push({ n, start: gStart, len: gLen });
+  }
+  return ghatikas;
+}
+
+// ─── API: SUNRISE/SUNSET ─────────────────────────────────────────────────────
+async function fetchSunTimes(lat, lng, dateStr) {
+  const url = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&date=${dateStr}&formatted=0`;
+  const r = await fetch(url);
+  const d = await r.json();
+  if (d.status !== 'OK') throw new Error('Sunrise API error');
+  return { sunrise: new Date(d.results.sunrise), sunset: new Date(d.results.sunset) };
+}
+
+function utcDateToLocalSec(utcDate, tzOffsetHours) {
+  const utcSec = utcDate.getUTCHours() * 3600 + utcDate.getUTCMinutes() * 60 + utcDate.getUTCSeconds();
+  return ((utcSec + tzOffsetHours * 3600) % 86400 + 86400) % 86400;
+}
+
+// ─── LOCATION-AWARE "NOW" ─────────────────────────────────────────────────────
+// Returns the current wall-clock date & time at a location with the given
+// UTC offset (hours) — independent of the browser/computer's own system
+// timezone. Date.now() is a true, timezone-agnostic UTC instant; shifting it
+// by the location's offset and reading the UTC* components back out gives
+// the correct local civil time at that location. This MUST be used anywhere
+// "now" needs to represent the selected location's current moment (e.g.
+// current-hora highlighting, "now" chart calculations) rather than
+// new Date().getHours()/getMinutes(), which silently returns the computer's
+// own local wall clock and is wrong whenever the user isn't physically in
+// the same timezone as the location they've selected.
+function getNowAtLocation(tzOffsetHours) {
+  const nowUtcMs = Date.now();
+  const localMs  = nowUtcMs + tzOffsetHours * 3600000;
+  const local    = new Date(localMs);
+  const hours    = local.getUTCHours();
+  const minutes  = local.getUTCMinutes();
+  const seconds  = local.getUTCSeconds();
+  return {
+    year: local.getUTCFullYear(),
+    month: local.getUTCMonth(),
+    day: local.getUTCDate(),
+    hours, minutes, seconds,
+    secOfDay: hours * 3600 + minutes * 60 + seconds,
+    // Plain calendar-only Date (no real "moment" meaning) for toDateString()/
+    // getTime() comparisons against state.selectedDate, which is built the
+    // same way (new Date(y, m, d), local-fields-only, no timezone semantics).
+    dateObj: new Date(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate())
+  };
+}
+
+// Builds a true UTC-anchored Date representing "year-month-day hours:minutes
+// wall-clock civil time at a location with the given UTC offset". Use this
+// instead of `new Date(y,m,d)` + `.setHours(h,m)`, which silently interprets
+// the time in the BROWSER's own system timezone — producing a timestamp
+// that's wrong by (browserOffset − locationOffset) hours whenever the two
+// differ, even though it "looks" correct in the UI.
+function civilToUTCDate(year, month, day, hours, minutes, seconds, tzOffsetHours) {
+  return new Date(Date.UTC(year, month, day, hours, minutes, seconds || 0, 0) - tzOffsetHours * 3600000);
+}
+
+// ─── API: GEOCODING ──────────────────────────────────────────────────────────
+let geoDebounce = null;
+async function geocodeCity(query) {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
+  const r = await fetch(url);
+  const d = await r.json();
+  return (d.results || []).map(x => ({
+    name: x.name, country: x.country, admin1: x.admin1 || '',
+    lat: x.latitude, lng: x.longitude,
+    tz: x.timezone, tzOffset: getTimezoneOffset(x.timezone)
+  }));
+}
+
+function getTimezoneOffset(tz) {
+  // Estimate offset using Intl
+  try {
+    const now = new Date();
+    const utcStr = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+    const tzStr = new Date(now.toLocaleString('en-US', { timeZone: tz }));
+    return (tzStr - utcStr) / 3600000;
+  } catch { return 0; }
+}
+
+// Sync Settings UI with initialized Ayanāṃśa state
+document.querySelectorAll('input[name=ayanamsa]').forEach(radio => {
+  if (radio.value === state.ayanamsa) {
+    radio.checked = true;
+  }
+});
+
+// ─── RENDER CALENDAR ─────────────────────────────────────────────────────────
+function renderCalendar() {
+  const { viewYear, viewMonth } = state;
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calTitle').textContent = `${months[viewMonth]} ${viewYear}`;
+
+  const grid = document.getElementById('calGrid');
+  const dows = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  const first = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const today = getNowAtLocation(state.location.tzOffset).dateObj;
+
+  // Leading blanks
+  for (let i = 0; i < first; i++) {
+    const d = new Date(viewYear, viewMonth, 1 - (first - i));
+    html += renderDay(d, true);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(viewYear, viewMonth, d);
+    html += renderDay(date, false);
+  }
+  const trailing = (7 - (first + daysInMonth) % 7) % 7;
+  for (let i = 1; i <= trailing; i++) {
+    const d = new Date(viewYear, viewMonth + 1, i);
+    html += renderDay(d, true);
+  }
+
+  grid.innerHTML = html;
+
+  // Click handlers
+  grid.querySelectorAll('.cal-day:not(.other-month)').forEach(el => {
+    el.addEventListener('click', () => {
+      const d = parseInt(el.dataset.day);
+      const m = parseInt(el.dataset.month);
+      const y = parseInt(el.dataset.year);
+      state.selectedDate = new Date(y, m, d);
+      renderCalendar();
+      loadHoras();
+      fetchSupabaseAstroData();
+    });
+  });
+}
+
+function renderDay(date, otherMonth) {
+  const today = getNowAtLocation(state.location.tzOffset).dateObj;
+  const isToday = date.getTime() === today.getTime();
+  const isSelected = state.selectedDate && date.getTime() === state.selectedDate.getTime();
+  let cls = 'cal-day';
+  if (otherMonth) cls += ' other-month';
+  if (isToday) cls += ' today';
+  if (isSelected) cls += ' selected';
+
+  if (otherMonth) {
+    return `<div class="${cls}" data-day="${date.getDate()}" data-month="${date.getMonth()}" data-year="${date.getFullYear()}">
+      <span class="cal-day-num">${date.getDate()}</span>
+    </div>`;
+  }
+
+  const p = getPanchanga(date);
+  // phase:null means month data is still loading — render cell neutrally
+  const phaseClass = p.phase
+    ? ({ waxing: 'tithi-waxing', full: 'tithi-full', waning: 'tithi-waning', new: 'tithi-new' }[p.phase] || '')
+    : '';
+  if (!isSelected && phaseClass) cls += ' ' + phaseClass;
+
+  // Sankranti: sun crosses a sidereal sign boundary today
+  const sankranti = getSankranti(date);
+  const sankranti_html = sankranti
+    ? `<span class="sankranti-icon" title="${sankranti} Saṅkrānti">☀</span>`
+    : '';
+
+  return `<div class="${cls}" data-day="${date.getDate()}" data-month="${date.getMonth()}" data-year="${date.getFullYear()}">
+    <span class="cal-day-num">${date.getDate()}</span>
+    <span class="nak-label">${p.nakShort}</span>
+    <span class="tithi-label">${p.tithiShort}</span>
+    ${sankranti_html}
+  </div>`;
+}
+
+// ─── LOAD & RENDER HORAS ─────────────────────────────────────────────────────
+async function loadHoras() {
+  if (!state.selectedDate) return;
+  const panel = document.getElementById('horaPanel');
+  panel.innerHTML = `<div class="state-overlay"><div class="spinner"></div><span>Calculating horas…</span></div>`;
+
+  try {
+    const date = state.selectedDate;
+    const y = date.getFullYear(), mo = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
+    const dateStr = `${y}-${mo}-${d}`;
+
+    const { sunrise, sunset } = await fetchSunTimes(state.location.lat, state.location.lng, dateStr);
+    const tzOff = state.location.tzOffset;
+
+    let sunriseSec = utcDateToLocalSec(sunrise, tzOff);
+    let sunsetSec = utcDateToLocalSec(sunset, tzOff);
+
+    // lmtOffsetSec: the true longitude-based correction (LMT - LST), always computed
+    // regardless of display mode. Used by Muhūrta to locate solar noon in LST.
+    // Formula: LMT = LST + lmtOffsetSec  (negative when location is west of tz meridian)
+    const lmtOffsetSec = getLMTOffset(state.location.lng, tzOff);
+
+    // lmtAdj: added to stored LST values only at *display* time when user picks LMT mode
+    const lmtAdj = state.timeType === 'lmt' ? lmtOffsetSec : 0;
+
+    const horas = calculateHoras(sunriseSec, sunsetSec, date, state.horaSystem, lmtOffsetSec);
+    const specials = getSpecialMuhurtas(sunriseSec, sunsetSec, date);
+
+    // Cache the params used for this render so fetchSupabaseAstroData() can
+    // re-render the panel later (once panchanga transitions arrive) without
+    // re-fetching sunrise/sunset times.
+    state.lastHoraRender = { horas, specials, sunriseSec, sunsetSec, lmtAdj, date };
+
+    renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date);
+  } catch (e) {
+    panel.innerHTML = `<div class="state-overlay"><div class="error-msg">⚠ ${e.message || 'Failed to fetch sun times. Check connection.'}</div></div>`;
+  }
+}
+
+function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
+  const panel = document.getElementById('horaPanel');
+  const locNow = getNowAtLocation(state.location.tzOffset);
+  const isToday = date.toDateString() === locNow.dateObj.toDateString();
+  const nowSec = isToday ? locNow.secOfDay : -1;
+
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dateLabel = `${dayNames[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  const timeLabel = state.timeType === 'lmt' ? 'LMT' : 'LST';
+
+  const pan = getPanchangaAtSunrise(date, sunriseSec, state.location.tzOffset);
+  const nakshatra = pan.nakName;
+  const tithiName = pan.tithiName;
+  const phase = pan.phase;
+
+  // Determine anchor event to inject into timeline
+  const sys = state.horaSystem;
+  const sysLabels = {
+    'kalahora': 'Kālahorā',
+    'mahakala-muhurta': 'Mahākālahorā (Muhūrta)',
+    'mahakala-prasna': 'Mahākālahorā (Praśna)',
+    'yamahora': 'Yāmahorā'
+  };
+  const sysLabel = sysLabels[sys] || sys;
+
+  // Compute the raw LMT offset (always geography-based, independent of display toggle)
+  const lmtOffsetSec = getLMTOffset(state.location.lng, state.location.tzOffset);
+
+  // Anchor seconds in LST — mirrors the calculateHoras logic exactly
+  let anchorSec = null;
+  let anchorLabel = '';
+  if (sys === 'kalahora') {
+    anchorSec = sunriseSec;
+    anchorLabel = 'Kālahorā cycle start (sunrise)';
+  } else if (sys === 'mahakala-muhurta') {
+    // solar noon in LST = 43200 − lmtOffsetSec; anchor = that − 6h
+    const noonLST = 43200 - lmtOffsetSec;
+    anchorSec = noonLST - 6 * 3600;
+    const noonDisp = secToTime(noonLST, lmtAdj);
+    anchorLabel = `Mahākālahorā (Muhūrta) start: Cycle anchor — solar noon LST (${noonDisp}) − 6h`;
+  } else if (sys === 'mahakala-prasna') {
+    anchorSec = 43200 - 6 * 3600; // 06:00:00 LST always
+    anchorLabel = `Mahākālahorā (Praśna) start: Cycle anchor — civil noon LST (12:00) − 6h`;
+  } else if (sys === 'yamahora') {
+    anchorSec = sunriseSec;
+    anchorLabel = 'Yāma day cycle start (sunrise)';
+  }
+
+  // Build merged timeline
+  const allEvents = [];
+  // Sunrise marker (always shown for context)
+  allEvents.push({ type: 'event', data: { name: 'Sunrise', sub: 'Vedic New Day Start', icon: '☀', color: 'var(--gold)' }, at: sunriseSec });
+  // Sunset marker
+  allEvents.push({ type: 'event', data: { name: 'Sunset', sub: 'Night cycle begins', icon: '☾', color: 'var(--text3)' }, at: sunsetSec });
+  // Anchor marker (only if different from sunrise)
+  if (anchorSec !== null && Math.abs(anchorSec - sunriseSec) > 60) {
+    allEvents.push({ type: 'anchor', data: { name: anchorLabel, icon: '◈' }, at: anchorSec });
+  }
+
+  horas.forEach(h => allEvents.push({ type: 'hora', data: h, at: h.start }));
+  specials.forEach(s => allEvents.push({ type: 'special', data: s, at: s.at }));
+
+  // ── Panchanga transition markers ─────────────────────────────────────────────
+  // Transition times come from data.transitions (computed server-side by the edge
+  // function's binary search). Each element has exactly one transition entry.
+  const sbTrans = state.supabaseAstroData?.transitions;
+  if (sbTrans) {
+    const panchaTypes = [
+      { type: 'tithi',     icon: '☽', label: 'Tithi ends'    },
+      { type: 'nakshatra', icon: '✦', label: 'Nakṣatra ends' },
+      { type: 'yoga',      icon: 'ℹ', label: 'Yoga ends'     },
+      { type: 'karana',    icon: '○', label: 'Karaṇa ends'   },
+    ];
+    for (const pt of panchaTypes) {
+      const tr = sbTrans[pt.type];
+      if (!tr?.endsUTC) continue;
+      // Convert the UTC ISO timestamp's local-civil-time string → seconds-since-midnight
+      const tr_endsLocal = tr.endsLocal || tr.endsUTC;
+      const [hh, mm, ss = '00'] = tr_endsLocal.slice(11, 19).split(':');
+      const timeOfDaySec = parseInt(hh) * 3600 + parseInt(mm) * 60 + parseInt(ss);
+      // The transition's calendar date can differ from the day being
+      // displayed (e.g. a nakshatra ending tomorrow afternoon) — anchor it
+      // using the actual day difference, in the same raw-seconds coordinate
+      // system the rest of this timeline uses for post-midnight events
+      // (where times past midnight are seconds > 86400, not wrapped to 0).
+      // Without this, a transition on a different day was silently treated
+      // as if it occurred today at that same clock time.
+      const trDateOnly = new Date(
+        parseInt(tr_endsLocal.slice(0, 4), 10),
+        parseInt(tr_endsLocal.slice(5, 7), 10) - 1,
+        parseInt(tr_endsLocal.slice(8, 10), 10)
+      );
+      const displayDateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const dayDiff = Math.round((trDateOnly - displayDateOnly) / 86400000);
+      const endLSTsec = timeOfDaySec + dayDiff * 86400;
+      const firstAt = horas.length ? horas[0].start : 0;
+      const lastAt  = horas.length ? horas[horas.length - 1].end : 86400;
+      if (endLSTsec >= firstAt && endLSTsec <= lastAt) {
+        allEvents.push({ type: 'pancha', at: endLSTsec, data: { ...pt, nextName: tr.nextName || '—' } });
+      }
+    }
+  }
+  // ── User-scheduled events ─────────────────────────────────────────────────────
+  eventsForDate(date).forEach(ev => {
+    allEvents.push({ type: 'scheduled', at: ev.startSec, data: ev });
+  });
+
+  allEvents.sort((a, b) => a.at - b.at);
+
+  let rows = '';
+
+  allEvents.forEach(ev => {
+    if (ev.type === 'hora') {
+      const h = ev.data;
+      const isCurrent = isToday && nowSec >= h.start && nowSec < h.end;
+      const isPast    = isToday && nowSec >= h.end;
+      const p = h.lord;
+      let trCls = isCurrent ? 'current-hora' : (isPast ? 'past-hora' : '');
+      trCls += h.isDay ? ' day-hora' : ' night-hora';
+      const dow = date.getDay(); // 0=Sun…6=Sat
+      const ghatikas = getGhatikas(sunriseSec, sunsetSec, h.start, h.end);
+      const gHtml = ghatikas.length
+        ? `<div class="ghatika-tags">${ghatikas.map(g => {
+            const gStart = Math.round(g.start);
+            const gEnd   = Math.round(g.start + g.len);
+            return `<span class="g-tag" data-gnum="${g.n}" data-gstart="${gStart}" data-gend="${gEnd}" data-dow="${dow}">G${g.n}</span>`;
+          }).join('')}</div>`
+        : '';
+      rows += `<tr class="${trCls}" data-hora-start="${h.start}" data-hora-end="${h.end}" data-hora-name="${p.name} Horā" style="cursor:pointer;">
+        <td class="time-cell">${secToTime(h.start, lmtAdj)}</td>
+        <td>
+          <div class="hora-name-cell ${isCurrent ? 'hora-current' : ''}">
+            <div class="hora-planet-badge" style="background:${p.bg}; color:${p.color};">${p.symbol}</div>
+            <span class="hora-planet-name">${p.name} Horā</span>
+            ${isCurrent ? '<span class="special-tag tag-auspicious">Now</span>' : ''}
+          </div>
+        </td>
+        <td class="ghatika-cell">${gHtml}</td>
+      </tr>`;
+    } else if (ev.type === 'special') {
+      const s = ev.data;
+      const tagCls = s.type === 'auspicious' ? 'tag-auspicious' : (s.type === 'inauspicious' ? 'tag-inauspicious' : '');
+      const timeRange = `${secToTime(s.at, lmtAdj)} – ${secToTime(s.end, lmtAdj)}`;
+      rows += `<tr class="event-row">
+        <td class="time-cell" style="color:var(--text3)">${secToTime(s.at, lmtAdj)}</td>
+        <td>
+          <div class="event-name">
+            ${s.name}
+            ${s.sub ? `<span class="special-tag ${tagCls}">${s.sub}</span>` : ''}
+          </div>
+        </td>
+        <td class="special-time-range">${timeRange}</td>
+      </tr>`;
+    } else if (ev.type === 'event') {
+      const e = ev.data;
+      rows += `<tr class="event-row">
+        <td colspan="3" style="padding:10px 16px; background:rgba(30,27,75,0.04); border-bottom:1px solid #e4d8c8;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:13px; font-weight:500; color:var(--gold2); white-space:nowrap; min-width:3.2em;">${secToTime(ev.at, lmtAdj)}</span>
+            <div class="event-name" style="color:${e.color || 'var(--gold)'}">
+              <span class="event-icon">${e.icon}</span>
+              ${e.name}
+              <span class="event-sub">${e.sub}</span>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    } else if (ev.type === 'pancha') {
+      const p = ev.data;
+      rows += `<tr class="pancha-change-row">
+        <td colspan="3">
+          <div class="pancha-change-cell">
+            <span class="pancha-change-time">${secToTime(ev.at, lmtAdj)}</span>
+            <div class="pancha-change-icon">${p.icon}</div>
+            <div class="pancha-change-body">
+              <span class="pancha-change-label">${p.label}</span>
+              <span class="pancha-change-name">→ ${p.nextName}<span class="pancha-change-tag">begins</span></span>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    } else if (ev.type === 'scheduled') {
+      const e = ev.data;
+      const timeStr = secToTime(e.startSec, lmtAdj) + (e.endSec ? ' – ' + secToTime(e.endSec, lmtAdj) : '');
+      rows += `<tr class="scheduled-event-row" data-event-id="${e.id}">
+        <td colspan="3">
+          <div class="sched-event-block" data-event-id="${e.id}">
+            <div class="sched-event-bar" style="background:${e.color};"></div>
+            <div class="sched-event-body">
+              <div class="sched-event-title">${e.title}</div>
+              <div class="sched-event-meta">${timeStr}</div>
+              ${e.description ? `<div class="sched-event-desc">${e.description}</div>` : ''}
+            </div>
+            <button class="sched-event-delete" data-event-id="${e.id}" title="Delete">✕</button>
+          </div>
+        </td>
+      </tr>`;
+    }
+  });
+
+  panel.innerHTML = `
+    <div class="hora-header">
+      <div class="hora-header-top">
+        <div>
+          <div class="hora-date-title">${dateLabel}</div>
+          <div class="hora-location-line">
+            <!--⌖ ${state.location.name}-->
+            <span class="time-type-badge">${sysLabel}</span>
+          </div>
+        </div>
+        <div class="sun-times-grid">
+          <div class="hora-sun-times">
+            <div class="label">Sunrise</div>
+            <strong>${secToTime(sunriseSec, lmtAdj)}</strong>
+          </div>
+          <div class="hora-sun-times">
+            <div class="label">Sunset</div>
+            <strong>${secToTime(sunsetSec, lmtAdj)}</strong>
+          </div>
+        </div>
+      </div>
+      <!--<div class="panchanga-pills">
+        <div class="panch-pill">
+          <span class="panch-pill-label">Tithi</span>
+          <span class="panch-pill-icon">${pan.phase === 'full' ? '○' : pan.phase === 'new' ? '●' : pan.phase === 'waxing' ? '◑' : '◐'}</span>
+          <span class="panch-pill-value">${pan.tithiName}</span>
+        </div>
+        <div class="panch-pill">
+          <span class="panch-pill-label">Nakshatra</span>
+          <span class="panch-pill-icon">✦</span>
+          <span class="panch-pill-value">${nakshatra}</span>
+        </div>
+        <div class="panch-pill">
+          <span class="panch-pill-label">Karaṇa</span>
+          <span class="panch-pill-icon">○</span>
+          <span class="panch-pill-value">${pan.karanaName}</span>
+        </div>
+        <div class="panch-pill">
+          <span class="panch-pill-label">Yoga</span>
+          <span class="panch-pill-icon">ℹ</span>
+          <span class="panch-pill-value">${pan.yogaName}</span>
+        </div>
+      </div>-->
+    </div>
+    <div class="hora-table-wrap" id="horaTableWrap">
+      <table class="hora-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Horā</th>
+            <th class="ghatika-cell" style="text-align:right;">Ghaṭikā</th>
+          </tr>
+        </thead>
+        <tbody id="horaTableBody">${rows}</tbody>
+      </table>
+    </div>`;
+
+  // ── After paint: sync height + scroll to 2 horas before current ─────────────
+  requestAnimationFrame(() => {
+
+    // 1. Match hora panel height exactly to calendar card height
+    const cal = document.querySelector('.calendar-card');
+    const panel = document.getElementById('horaPanel');
+    const chart = document.getElementById('rasiChartWrap');
+    if (cal && panel) {
+      panel.style.height = cal.offsetHeight + 'px';
+    }
+    if (cal && chart) {
+      chart.style.height = cal.offsetHeight + 'px';
+    }
+
+    // 2. Scroll so the 2nd past hora before current is the first visible row
+    const wrap = document.getElementById('horaTableWrap');
+    if (!wrap) return;
+
+    const currentRow = wrap.querySelector('tr.current-hora');
+    if (!currentRow) { wrap.scrollTop = 0; return; }
+
+    // Walk backwards collecting past-hora rows; stop after finding 2
+    const pastRows = [];
+    let sib = currentRow.previousElementSibling;
+    while (sib && pastRows.length < 2) {
+      if (sib.classList.contains('past-hora')) pastRows.unshift(sib);
+      sib = sib.previousElementSibling;
+    }
+
+    // Scroll target: top of the earliest past hora we found (or current if <2 past)
+    const targetRow = pastRows.length > 0 ? pastRows[0] : currentRow;
+    // offsetTop is relative to the table, which starts after thead
+    const theadH = wrap.querySelector('thead') ? wrap.querySelector('thead').offsetHeight : 0;
+    wrap.scrollTop = targetRow.offsetTop + theadH;
+  });
+
+  // ── Render live sidereal chart (updates every minute) ────────────────────────
+  //if (window._rasiChartTimer) clearInterval(window._rasiChartTimer);
+  function drawRasiChart() {
+    const wrap = document.getElementById('rasiSvgWrap');
+    const timeEl = document.getElementById('rasiChartTime');
+    if (!wrap) return;
+    // Internal SVG viewBox units should track the actual available width —
+    // previously capped at 340px, which made sense for the 290px-wide
+    // desktop sidebar column but left the chart's internal proportions
+    // (font sizes, stroke widths) mismatched once the panel spans the full
+    // screen width on mobile (CSS stretched the display size, but the
+    // viewBox stayed small, making strokes look disproportionately thick).
+    const chartSize = wrap.clientWidth ? Math.max(wrap.clientWidth - 24, 200) : 256;
+
+    // All planetary data comes from the Supabase cache — no local ephemeris
+    let grahas = null;
+    let lagna  = null;
+    const sb = state.supabaseAstroData;
+    if (sb?.coordinates) {
+      const c = sb.coordinates;
+      grahas = {
+        su: c.sun       ? { deg: mod360(c.sun.sidereal),     retro: false }              : null,
+        mo: c.moon      ? { deg: mod360(c.moon.sidereal),    retro: false }              : null,
+        ma: c.mars      ? { deg: mod360(c.mars.sidereal),    retro: !!c.mars.retrograde }    : null,
+        me: c.mercury   ? { deg: mod360(c.mercury.sidereal), retro: !!c.mercury.retrograde } : null,
+        ju: c.jupiter   ? { deg: mod360(c.jupiter.sidereal), retro: !!c.jupiter.retrograde } : null,
+        ve: c.venus     ? { deg: mod360(c.venus.sidereal),   retro: !!c.venus.retrograde }   : null,
+        sa: c.saturn    ? { deg: mod360(c.saturn.sidereal),  retro: !!c.saturn.retrograde }  : null,
+        ra: c.rahu      ? { deg: mod360(c.rahu.sidereal),    retro: !!c.rahu.retrograde }    : null,
+        ke: c.ketu      ? { deg: mod360(c.ketu.sidereal),    retro: !!c.ketu.retrograde }    : null,
+      };
+      Object.keys(grahas).forEach(k => { if (grahas[k] === null) delete grahas[k]; });
+      lagna = c.ascendant ? mod360(c.ascendant.sidereal) : 0;
+    }
+
+
+    // Panchanga elements — from Supabase cache only
+    const sunrisePan = panchangaFromCache();
+
+    const lagnaRasiName = lagna !== null
+      ? ['Aries','Taurus','Gemini','Cancer','Leo','Virgo',
+         'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'][Math.floor(lagna/30)]
+      : '—';
+    const lagDeg = lagna !== null ? (lagna % 30).toFixed(1) : '—';
+    const varaName = VARA_NAMES[(state.selectedDate || new Date()).getDay()];
+
+    // Transition end-times — from data.transitions (server binary-search result)
+    const trans = sb?.transitions;
+    const selDate = state.selectedDate;
+    const tithiEnd  = trans?.tithi     ? formatTransitionEnd(trans.tithi.endsLocal,     selDate) : '—';
+    const nakEnd    = trans?.nakshatra ? formatTransitionEnd(trans.nakshatra.endsLocal,  selDate) : '—';
+    const yogaEnd   = trans?.yoga      ? formatTransitionEnd(trans.yoga.endsLocal,       selDate) : '—';
+    const karanaEnd = trans?.karana    ? formatTransitionEnd(trans.karana.endsLocal,     selDate) : '—';
+
+    const chartHtml = (grahas && lagna !== null)
+      ? renderSouthIndianChart(lagna, grahas, chartSize)
+      : `<div style="color:var(--text3);font-size:12px;padding:10px 0;font-style:italic;">
+           Select a date to load chart from Supabase…
+         </div>`;
+
+    wrap.innerHTML = chartHtml + `
+      <div style="font-size:10px; color:var(--text3);  text-align:center;">℞ retrograde</div>
+      <div class="rasi-panch-info">
+        <div class="rasi-panch-heading">Pañcāṅga at time selected</div>
+        <div class="rasi-panch-row">
+          <span class="rasi-panch-key">Lagna</span>
+          <span class="rasi-panch-val">${lagnaRasiName} ${lagDeg}°</span>
+        </div>
+        <div class="rasi-panch-row">
+          <span class="rasi-panch-key">Vara</span>
+          <span class="rasi-panch-val">${varaName}</span>
+        </div>
+        <div class="rasi-panch-row">
+          <span class="rasi-panch-key">Tithi</span>
+          <span class="rasi-panch-val">${sunrisePan.tithiName}<span class="rasi-panch-end">${tithiEnd}</span></span>
+        </div>
+        <div class="rasi-panch-row">
+          <span class="rasi-panch-key">Nakṣatra</span>
+          <span class="rasi-panch-val">${sunrisePan.nakName}<span class="rasi-panch-end">${nakEnd}</span></span>
+        </div>
+        <div class="rasi-panch-row">
+          <span class="rasi-panch-key">Yoga</span>
+          <span class="rasi-panch-val">${sunrisePan.yogaName}<span class="rasi-panch-end">${yogaEnd}</span></span>
+        </div>
+        <div class="rasi-panch-row">
+          <span class="rasi-panch-key">Karaṇa</span>
+          <span class="rasi-panch-val">${sunrisePan.karanaName}<span class="rasi-panch-end">${karanaEnd}</span></span>
+        </div>
+      </div>`;
+  }
+  window._drawRasiChart = drawRasiChart; // expose to fetchSupabaseAstroData
+  drawRasiChart();
+  //window._rasiChartTimer = setInterval(drawRasiChart, 60000);
+}
+
+// ─── SOUTH INDIAN RASI CHART SVG RENDERER ────────────────────────────────────
+// South Indian style: fixed rasi positions, lagna marked with diagonal lines
+const RASI_NAMES_SHORT = ['Ar','Ta','Ge','Cn','Le','Vi','Li','Sc','Sg','Cp','Aq','Pi'];
+// SVG <text> font-family attributes need a literal value, not a CSS var()
+// reference, so this mirrors --font-sans exactly to keep the chart's
+// rendering consistent with the rest of the (now all-sans-serif) UI.
+const FONT_SANS_SVG = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const GRAHA_GLYPHS = { su:'Su', mo:'Mo', ma:'Ma', me:'Me', ju:'Ju', ve:'Ve', sa:'Sa', ra:'Ra', ke:'Ke' };
+const GRAHA_COLORS = {
+  su:'#d4820a', mo:'#7090b8', ma:'#c03030', me:'#2a7a2a',
+  ju:'#7a5ab0', ve:'#2a7878', sa:'#5a5a8a', ra:'#555', ke:'#888'
+};
+
+// South Indian grid: 4×4, corners empty, rasis in fixed positions
+// Row-major cell index 0–15; rasi 0 (Aries) = cell 1, going rightward then down
+const SI_CELL_TO_RASI = [
+  null,  0,  1,  2,
+  11, null, null,  3,
+  10, null, null,  4,
+   9,  8,  7,  6, // wait — rasi 5 (Virgo) missing...
+];
+// Corrected South Indian layout (standard): 
+// Row 0: [Pi, Ar, Ta, Ge]  = rasi [11,0,1,2]
+// Row 1: [Aq, -, -, Cn]    = rasi [10,-,-,3]
+// Row 2: [Cp, -, -, Le]    = rasi [9,-,-,4]
+// Row 3: [Sg, Sc, Li, Vi]  = rasi [8,7,6,5]
+const SI_GRID = [
+  [11, 0, 1, 2],
+  [10,-1,-1, 3],
+  [ 9,-1,-1, 4],
+  [ 8, 7, 6, 5]
+];
+
+function renderSouthIndianChart(lagna, grahas, size) {
+  const lagnaRasi = Math.floor(lagna / 30);
+
+  // Assign grahas to rasis
+  const rasiContents = Array.from({length:12}, () => []);
+  for (const [key, g] of Object.entries(grahas)) {
+    const rasi = Math.floor(g.deg / 30);
+    const degInSign = (g.deg % 30).toFixed(0);
+    rasiContents[rasi].push({ key, degInSign, retro: g.retro });
+  }
+
+  const W = size || 280, H = size || 280;
+  const cw = W / 4, ch = H / 4;
+  const LINE = '#1a1a1a';      // near-black for all grid lines
+  const TEXT_RASI = '#8b0000'; // dark red for rasi numbers
+  const TEXT_MAIN = '#990000'; // strong red for graha names
+  const TEXT_DEG  = '#cc2200'; // slightly lighter red for degree
+  const TEXT_CTR  = '#7a0000'; // deep red for center labels
+  const RETRO     = '#9a6b00'; // amber/goldenrod — distinct from the red palette, for retrograde markers
+
+  // Outer border
+  let cells = `<rect x="0" y="0" width="${W}" height="${H}" fill="#fffcf6" stroke="${LINE}" stroke-width="1.8" rx="2"/>`;
+
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 4; col++) {
+      const rasi = SI_GRID[row][col];
+      if (rasi === -1) continue;
+      const x = col * cw, y = row * ch;
+      const isLagna = (rasi === lagnaRasi);
+
+      // Cell fill — warm tint for lagna, plain cream otherwise
+      cells += `<rect x="${x}" y="${y}" width="${cw}" height="${ch}"
+        fill="${isLagna ? '#fff3dc' : '#fffcf6'}" stroke="${LINE}" stroke-width="1"/>`;
+
+      // Lagna marker: two parallel diagonal lines at top-left corner
+      if (isLagna) {
+        cells += `<line x1="${x+2}" y1="${y+13}" x2="${x+13}" y2="${y+2}" stroke="${LINE}" stroke-width="1.2"/>`;
+        cells += `<line x1="${x+2}" y1="${y+20}" x2="${x+20}" y2="${y+2}" stroke="${LINE}" stroke-width="0.9"/>`;
+      }
+
+      // Rasi number — top-left, small, dark red
+      cells += `<text x="${x+4}" y="${y+12}" font-size="9.5"
+        fill="${TEXT_RASI}" font-family="${FONT_SANS_SVG}" font-weight="600">${rasi+1}</text>`;
+
+      // Graha names + degrees — laid out in a 2-column grid within cell
+      const contents = rasiContents[rasi];
+      contents.forEach((g, i) => {
+        const gc = i % 2, gr = Math.floor(i / 2);
+        const tx = x + 5 + gc * 31;
+        const ty = y + 27 + gr * 20;
+        const glyphColor = g.retro ? RETRO : TEXT_MAIN;
+        // ℞ marker: redundant color + symbol encoding (not color alone),
+        // so retrograde status reads clearly even for colorblind users or
+        // on low-quality screens.
+        const retroMark = g.retro
+          ? `<tspan font-size="10" dy="-3" fill="${RETRO}">℞</tspan>`
+          : '';
+        cells += `<text x="${tx}" y="${ty}" font-size="16"
+          fill="${glyphColor}" font-family="${FONT_SANS_SVG}" font-weight="700"
+          >${GRAHA_GLYPHS[g.key]}${retroMark}</text>`;
+        cells += `<text x="${tx}" y="${ty+11}" font-size="8"
+          fill="${TEXT_DEG}" font-family="${FONT_SANS_SVG}">${g.degInSign}°</text>`;
+      });
+    }
+  }
+
+  // Center 2×2 void: border + two X diagonals — all black
+  cells += `<rect x="${cw}" y="${ch}" width="${2*cw}" height="${2*ch}"
+    fill="#faf7f2" stroke="${LINE}" stroke-width="1"/>`;
+  //cells += `<line x1="${cw}" y1="${ch}" x2="${3*cw}" y2="${3*ch}" stroke="${LINE}" stroke-width="1"/>`;
+  //cells += `<line x1="${3*cw}" y1="${ch}" x2="${cw}" y2="${3*ch}" stroke="${LINE}" stroke-width="1"/>`;
+
+  // Ascendant label at centre intersection — red
+  const cx = W/2, cy = H/2;
+  const lagDeg = (lagna % 30).toFixed(1);
+  cells += `<text x="${cx}" y="${cy-5}" text-anchor="middle" font-size="19"
+    fill="${TEXT_CTR}" font-family="${FONT_SANS_SVG}" font-weight="700">ॐ</text>`;
+  cells += `<text x="${cx}" y="${cy+9}" text-anchor="middle" font-size="8.5"
+    fill="${TEXT_DEG}" font-family="${FONT_SANS_SVG}">AUM</text>`;
+
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${cells}</svg>`;
+}
+
+// ─── LOCATION SEARCH ─────────────────────────────────────────────────────────
+const locInput = document.getElementById('locationInput');
+const locDropdown = document.getElementById('locDropdown');
+locInput.value = state.location.name;
+
+locInput.addEventListener('input', () => {
+  clearTimeout(geoDebounce);
+  const q = locInput.value.trim();
+  if (q.length < 2) { locDropdown.classList.remove('open'); return; }
+  locDropdown.innerHTML = '<div class="loc-status">Searching…</div>';
+  locDropdown.classList.add('open');
+  geoDebounce = setTimeout(async () => {
+    try {
+      const results = await geocodeCity(q);
+      if (results.length === 0) {
+        locDropdown.innerHTML = '<div class="loc-status">No results found</div>';
+        return;
+      }
+      locDropdown.innerHTML = results.map((r, i) =>
+        `<div class="loc-item" data-i="${i}" data-name="${r.name}" data-lat="${r.lat}" data-lng="${r.lng}" data-tz="${r.tz}" data-tzoff="${r.tzOffset}">
+          ${r.name}${r.admin1 ? ', ' + r.admin1 : ''}
+          <small>${r.country} · ${r.lat.toFixed(2)}°N, ${r.lng.toFixed(2)}°E</small>
+        </div>`).join('');
+      locDropdown.querySelectorAll('.loc-item').forEach(el => {
+        el.addEventListener('click', () => {
+          // Was the currently-selected date "today" under the OLD location?
+          // Capture this before reassigning state.location, since "today"
+          // is location-dependent (crossing a UTC-offset boundary can shift
+          // which calendar date counts as "today").
+          const wasToday = state.selectedDate &&
+            state.selectedDate.toDateString() === getNowAtLocation(state.location.tzOffset).dateObj.toDateString();
+
+          state.location = {
+            name: el.dataset.name,
+            lat: parseFloat(el.dataset.lat),
+            lng: parseFloat(el.dataset.lng),
+            tz: el.dataset.tz,
+            tzOffset: parseFloat(el.dataset.tzoff)
+          };
+          locInput.value = el.dataset.name;
+          locDropdown.classList.remove('open');
+          state.panchangaCache = {};
+          state.monthPanchangaFetching.clear(); // cancel dedup so new location fetches fresh
+
+          // If the user was viewing "today", keep them on "today" — now
+          // re-evaluated for the NEW location, which may be a different
+          // calendar date than before.
+          if (wasToday) {
+            const newToday = getNowAtLocation(state.location.tzOffset).dateObj;
+            state.selectedDate = newToday;
+            state.viewYear = newToday.getFullYear();
+            state.viewMonth = newToday.getMonth();
+          }
+          renderCalendar();
+          fetchMonthPanchanga(state.viewYear, state.viewMonth);
+          if (state.selectedDate) {loadHoras(); fetchSupabaseAstroData();}
+        });
+      });
+    } catch {
+      locDropdown.innerHTML = '<div class="loc-status">Search failed</div>';
+    }
+  }, 400);
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#locationWrap')) locDropdown.classList.remove('open');
+  if (!e.target.closest('.settings-wrap')) document.getElementById('settingsPanel').classList.remove('open');
+});
+
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
+document.getElementById('settingsBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('settingsPanel').classList.toggle('open');
+});
+
+
+
+const horaSystemNotes = {
+  'kalahora': '24 equal 60-min horas anchored to sunrise. Sunset ignored. Vāra lord rules hora 1.',
+  'mahakala-muhurta': 'Anchored to LMT noon − 6 hours. 24 equal 60-min horas. Vāra lord rules hora 1. Uses Local Mean Time.',
+  'mahakala-prasna': 'Anchored to LST noon − 6 hours (06:00 LST). 24 equal 60-min horas. Vāra lord rules hora 1.',
+  'yamahora': 'Day arc (sunrise→sunset) and night arc each divided into 12 unequal horas. Durations vary by season.'
+};
+document.querySelectorAll('input[name=horaSystem]').forEach(r => r.addEventListener('change', e => {
+  state.horaSystem = e.target.value;
+  document.getElementById('horaSystemNote').textContent = horaSystemNotes[e.target.value] || '';
+  // Mahakala-Muhurta is LMT-anchored: auto-hint the user
+  const lmtNote = document.getElementById('lmtAutoNote');
+  if (e.target.value === 'mahakala-muhurta') {
+    lmtNote.style.display = 'block';
+  } else {
+    lmtNote.style.display = 'none';
+  }
+  if (state.selectedDate) loadHoras();
+}));
+
+document.querySelectorAll('input[name=timeType]').forEach(r => r.addEventListener('change', e => {
+  state.timeType = e.target.value;
+  if (state.selectedDate) loadHoras();
+}));
+
+document.querySelectorAll('input[name=ayanamsa]').forEach(r => r.addEventListener('change', e => {
+  state.ayanamsa = e.target.value;
+  state.panchangaCache = {};   // invalidate — ayanamsa affects nakshatra/tithi
+  state.monthPanchangaFetching.clear(); // allow re-fetch with new ayanamsa
+  renderCalendar();
+  fetchMonthPanchanga(state.viewYear, state.viewMonth);
+  if (state.selectedDate) {loadHoras(); fetchSupabaseAstroData();}
+}));
+
+// ─── DEFAULT LOCATION ─────────────────────────────────────────────────────────
+function updateDefaultLocDisplay() {
+  const saved = loadDefaultLocation();
+  const el = document.getElementById('defaultLocName');
+  if (el) el.textContent = saved.name;
+}
+updateDefaultLocDisplay();
+
+document.getElementById('setDefaultLocBtn').addEventListener('click', () => {
+  try {
+    localStorage.setItem('horadarpan_default_loc', JSON.stringify(state.location));
+    updateDefaultLocDisplay();
+    const msg = document.getElementById('defaultSavedMsg');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+  } catch { /* localStorage unavailable */ }
+});
+
+// ─── DEFAULT AYANAMSA PERSISTENCE ───────────────────────────────────────────
+function updateDefaultAyanamsaDisplay() {
+  const saved = loadDefaultAyanamsa();
+  const el = document.getElementById('defaultAyanamsaName');
+  if (el) {
+    // Format display names cleanly for the user label
+    const formattingMap = {
+      'lahiri': 'Lahiri',
+      'raman': 'Raman',
+      'true-chitrapaksa': 'True Chitrapaksa',
+      'true-pushya': 'True Pushya'
+    };
+    el.textContent = formattingMap[saved] || saved;
+  }
+}
+updateDefaultAyanamsaDisplay(); // Run once on initialization
+
+document.getElementById('setDefaultAyanamsaBtn').addEventListener('click', () => {
+  try {
+    localStorage.setItem('horadarpan_default_ayanamsa', state.ayanamsa);
+    updateDefaultAyanamsaDisplay();
+    const msg = document.getElementById('defaultAyanamsaSavedMsg');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+  } catch { /* localStorage fallback guard */ }
+});
+
+// ─── SYNC PANEL HEIGHT TO CALENDAR ───────────────────────────────────────────
+function syncPanelHeight() {
+  requestAnimationFrame(() => {
+    const cal = document.querySelector('.calendar-card');
+    const panel = document.getElementById('horaPanel');
+    const chart = document.getElementById('rasiChartWrap');
+    if (cal && window.innerWidth > 1040) {
+      if (panel) panel.style.height = cal.offsetHeight + 'px';
+      if (chart) chart.style.height = cal.offsetHeight + 'px';
+    }
+  });
+}
+
+// ─── TODAY BUTTON ─────────────────────────────────────────────────────────────
+document.getElementById('todayBtn').addEventListener('click', () => {
+  const today = getNowAtLocation(state.location.tzOffset).dateObj;
+  state.viewYear = today.getFullYear();
+  state.viewMonth = today.getMonth();
+  state.selectedDate = today;
+  renderCalendar();
+  syncPanelHeight();
+  loadHoras();
+  fetchSupabaseAstroData();
+  fetchMonthPanchanga(state.viewYear, state.viewMonth);
+});
+
+// ─── CALENDAR NAV ─────────────────────────────────────────────────────────────
+document.getElementById('prevMonth').addEventListener('click', () => {
+  state.viewMonth--;
+  if (state.viewMonth < 0) { state.viewMonth = 11; state.viewYear--; }
+  renderCalendar();
+  syncPanelHeight();
+  refreshYogaDropdownIfOpen();
+  fetchMonthPanchanga(state.viewYear, state.viewMonth);
+});
+document.getElementById('nextMonth').addEventListener('click', () => {
+  state.viewMonth++;
+  if (state.viewMonth > 11) { state.viewMonth = 0; state.viewYear++; }
+  renderCalendar();
+  syncPanelHeight();
+  refreshYogaDropdownIfOpen();
+  fetchMonthPanchanga(state.viewYear, state.viewMonth);
+});
+
+// ─── EVENT POPUP ENGINE ───────────────────────────────────────────────────────
+const EVENT_COLORS = [
+  '#b8860b','#6b4e9e','#1a5c1a','#8b2020',
+  '#2a5a5a','#3a3a5c','#4a6080','#805020',
+];
+
+// Populate colour swatches
+const swatchWrap = document.getElementById('popupColors');
+EVENT_COLORS.forEach(c => {
+  const s = document.createElement('div');
+  s.className = 'color-swatch';
+  s.style.background = c;
+  s.dataset.color = c;
+  s.title = c;
+  swatchWrap.appendChild(s);
+});
+
+let _popupSelectedColor = EVENT_COLORS[0];
+let _popupHoraStart = 0, _popupHoraEnd = 3600;
+
+function secToTimeInput(sec) {
+  const s = ((sec % 86400) + 86400) % 86400;
+  return String(Math.floor(s/3600)).padStart(2,'0') + ':' + String(Math.floor((s%3600)/60)).padStart(2,'0');
+}
+
+// Convert a time-input string ('HH:MM') to raw LST seconds, keeping the result
+// in the same "day band" as referenceRawSec (which may exceed 86400 for post-midnight).
+// This ensures that e.g. '00:30' entered for a 00:21 hora (stored as 87660s)
+// correctly becomes 87800s rather than 1800s.
+function timeInputToSec(str, referenceRawSec) {
+  const [h, m] = str.split(':').map(Number);
+  const baseSec = h * 3600 + m * 60;            // plain seconds, 0–86399
+  if (referenceRawSec === undefined) return baseSec;
+  // The day-offset is how many full days referenceRawSec is into (0 = same day, 1 = next day)
+  const dayOffset = Math.floor(referenceRawSec / 86400) * 86400;
+  // Try placing baseSec in the same day-band as referenceRawSec
+  let candidate = dayOffset + baseSec;
+  // If more than 12 hours before the reference, shift forward one day-band
+  if (candidate < referenceRawSec - 43200) candidate += 86400;
+  // If more than 12 hours after the reference, shift back one day-band
+  if (candidate > referenceRawSec + 43200) candidate -= 86400;
+  return candidate;
+}
+
+function openPopup(row) {
+  const horaStart = parseInt(row.dataset.horaStart);
+  const horaEnd   = parseInt(row.dataset.horaEnd);
+  const horaName  = row.dataset.horaName || 'Horā';
+  _popupHoraStart = horaStart;
+  _popupHoraEnd   = horaEnd;
+  _popupSelectedColor = EVENT_COLORS[0];
+
+  // Pre-fill fields
+  document.getElementById('popupTitle').value = '';
+  document.getElementById('popupDesc').value  = '';
+  document.getElementById('popupStartTime').value = secToTimeInput(horaStart);
+  document.getElementById('popupEndTime').value   = secToTimeInput(horaEnd);
+  document.getElementById('popupHoraLabel').textContent = horaName;
+
+  // Reset swatches
+  swatchWrap.querySelectorAll('.color-swatch').forEach(s => {
+    s.classList.toggle('selected', s.dataset.color === _popupSelectedColor);
+  });
+
+  // Position popup: fixed to the left of the hora panel, vertically centered in viewport.
+  const popup = document.getElementById('eventPopup');
+  popup.style.display = 'block';
+
+  const horaPanel = document.getElementById('horaPanel');
+  const panelRect = horaPanel.getBoundingClientRect();
+  const pw = popup.offsetWidth  || 320;
+  const ph = popup.offsetHeight || 440;
+
+  // Left: just to the left of the hora panel, overlaying the calendar
+  const left = Math.max(8, panelRect.left - pw - 12);
+
+  // Vertical: always centered in the visible viewport
+  const top = window.scrollY + (window.innerHeight - ph) / 2;
+
+  popup.style.left = left + 'px';
+  popup.style.top  = top  + 'px';
+
+  document.getElementById('eventPopupOverlay').style.display = 'block';
+  document.getElementById('popupTitle').focus();
+}
+
+function closePopup() {
+  document.getElementById('eventPopup').style.display = 'none';
+  document.getElementById('eventPopupOverlay').style.display = 'none';
+}
+
+// Swatch selection
+swatchWrap.addEventListener('click', e => {
+  const s = e.target.closest('.color-swatch');
+  if (!s) return;
+  _popupSelectedColor = s.dataset.color;
+  swatchWrap.querySelectorAll('.color-swatch').forEach(sw =>
+    sw.classList.toggle('selected', sw.dataset.color === _popupSelectedColor));
+});
+
+document.getElementById('popupClose').addEventListener('click', closePopup);
+document.getElementById('popupCancel').addEventListener('click', closePopup);
+document.getElementById('eventPopupOverlay').addEventListener('click', closePopup);
+
+document.getElementById('popupSave').addEventListener('click', () => {
+  const title = document.getElementById('popupTitle').value.trim();
+  if (!title) { document.getElementById('popupTitle').focus(); return; }
+  // Use _popupHoraStart as the reference so post-midnight times get the correct raw value
+  const startSec = timeInputToSec(document.getElementById('popupStartTime').value, _popupHoraStart);
+  const endSec   = timeInputToSec(document.getElementById('popupEndTime').value,   startSec);
+  const desc     = document.getElementById('popupDesc').value.trim();
+  const ev = {
+    id:         Date.now().toString(36) + Math.random().toString(36).slice(2),
+    dateKey:    dateKey(state.selectedDate),
+    startSec, endSec, title,
+    description: desc,
+    color: _popupSelectedColor,
+  };
+  state.events.push(ev);
+  saveEvents();
+  closePopup();
+  loadHoras();
+  fetchSupabaseAstroData();
+});
+
+// Click on hora rows to open popup (event delegation on table body)
+document.addEventListener('click', e => {
+  // Delete button on scheduled event
+  const delBtn = e.target.closest('.sched-event-delete');
+  if (delBtn) {
+    e.stopPropagation();
+    const id = delBtn.dataset.eventId;
+    state.events = state.events.filter(ev => ev.id !== id);
+    saveEvents();
+    loadHoras();
+    return;
+  }
+  // Click on hora row — open scheduling popup
+  const horaRow = e.target.closest('tr[data-hora-start]');
+  if (horaRow && document.getElementById('horaTableBody')?.contains(horaRow)) {
+    openPopup(horaRow);
+  }
+});
+
+// Dismiss popup with Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePopup();
+});
+
+// ─── AUSPICIOUS YOGAS ────────────────────────────────────────────────────────
+// Each yoga has: name, shortDesc, color, and a check(date, pan) function.
+// check() receives the JS Date and the panchanga object computed at sunrise.
+// Returns true if the yoga is active on that date.
+// ── STUB: all checks currently return false ──────────────────────────────────
+// Replace each check() body with the actual calculation when ready.
+// ─── AUSPICIOUS YOGAS ────────────────────────────────────────────────────────
+// Each yoga has: name, desc, color, and:
+//   check(date, pan)           → boolean  (is yoga active at sunrise on this date?)
+//   windows(year, month, tzOff)→ [{d, startJD, endJD}, …]  (precise time windows, optional)
+// If a yoga defines windows(), the dropdown shows date + time range.
+// Otherwise just dates are shown.
+
+const AUSPICIOUS_YOGAS = [
+  {
+    name: 'Ravi Yoga',
+    desc: 'Moon occupies the 4th, 6th, 9th, 10th, 13th, or 20th nakshatra from the Sun\'s nakshatra. Bestows fame, success, and governmental favour.',
+    color: '#c8860a',
+    check(date, pan) {
+      // STUB
+      return false;
+    }
+  },
+  {
+    name: 'Sarvartha Siddhi Yoga',
+    desc: 'A highly auspicious combination of Vara, Tithi, and Nakshatra. All undertakings begun in this yoga reach successful completion.',
+    color: '#6b4e9e',
+    // Condition: specific Vara + Nakshatra pairs (varies by classical source)
+    // Common table: Sun+Hasta, Sun+Pushya, Mon+Rohini, Mon+Mrigashira, Tue+Ashwini, etc.
+    check(date, pan) {
+      // STUB
+      return false;
+    }
+  },
+  {
+    name: 'Amrit Siddhi Yoga',
+    desc: 'Considered the nectar of all yogas. Formed by specific Vara–Nakshatra combinations; extremely rare and highly powerful.',
+    color: '#1a5c1a',
+    // Condition: Sun+Hasta, Mon+Mrigashira, Tue+Ashwini, Wed+Anuradha,
+    //            Thu+Pushya, Fri+Revati, Sat+Rohini
+    check(date, pan) {
+      // STUB
+      return false;
+    }
+  },
+  {
+    name: 'Dwipushkar Yoga',
+    desc: 'Actions performed during this yoga yield double results. Formed on Tuesday, Saturday, or Sunday with specific tithis and nakshatras.',
+    color: '#2a5a5a',
+    // Condition: (Tue/Sat/Sun) + (Dvitiya/Saptami/Dvadashi tithi) + (Krittika/Punarvasu/Vishakha nak)
+    check(date, pan) {
+      // STUB
+      return false;
+    }
+  },
+  {
+    name: 'Tripushkar Yoga',
+    desc: 'Actions yield triple results. Very rare. Formed on Wednesday, Friday, or Sunday with specific tithis and nakshatras.',
+    color: '#8b2020',
+    // Condition: (Wed/Fri/Sun) + (Tritiya/Ashtami/Trayodashi tithi) + (Krittika/Punarvasu/Uttara Phalguni/Vishakha/Uttarashada/Purva Bhadra nak)
+    check(date, pan) {
+      // STUB
+      return false;
+    }
+  },
+  {
+    name: 'Ravi Pushya Yoga',
+    desc: 'Pushya nakshatra falling on a Sunday. One of the most auspicious yogas for beginning new ventures, purchases, and initiations.',
+    color: '#c8860a',
+    // Condition: Sunday (dow 0) AND Pushya nakshatra (nakIdx 7)
+    check(date, pan) {
+      // STUB — replace with: return date.getDay() === 0 && pan.nakIdx === 7;
+      return false;
+    }
+  },
+  {
+    name: 'Guru Pushya Yoga',
+    desc: 'Pushya nakshatra falling on a Thursday. Exceptionally auspicious for learning, initiation into mantra, and beginning education.',
+    color: '#6b4e9e',
+    // Condition: Thursday (dow 4) AND Pushya nakshatra (nakIdx 7)
+    check(date, pan) {
+      // STUB — replace with: return date.getDay() === 4 && pan.nakIdx === 7;
+      return false;
+    }
+  },
+  {
+    name: 'Maitreya Yoga',
+    desc: 'Formed by a benefic Vara–Nakshatra combination. Associated with friendship, harmony, and the fulfilment of benevolent desires.',
+    color: '#4a6080',
+    // Condition: varies — one common definition: Monday + Rohini or Mrigashira
+    check(date, pan) {
+      // STUB
+      return false;
+    }
+  },
+];
+
+// ─── YOGA MONTHLY COMPUTATION ─────────────────────────────────────────────────
+// Scans every day in the given month, calls getPanchanga() and each yoga's
+// check(), and returns a map: yogaName → [date1, date2, …]
+function computeYogasForMonth(year, month) {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const result = {};
+  AUSPICIOUS_YOGAS.forEach(y => { result[y.name] = []; });
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    const pan  = getPanchanga(date);          // uses cached computation at sunrise
+    AUSPICIOUS_YOGAS.forEach(yoga => {
+      if (yoga.check(date, pan)) result[yoga.name].push(d);
+    });
+  }
+  return result;
+}
+
+// ─── YOGA DROPDOWN ENGINE ─────────────────────────────────────────────────────
+const yogaBtn      = document.getElementById('yogaBtn');
+const yogaDropdown = document.getElementById('yogaDropdown');
+const yogaList     = document.getElementById('yogaList');
+const yogaMonthLbl = document.getElementById('yogaMonthLabel');
+
+const MONTH_NAMES = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
+
+function renderYogaDropdown() {
+  const { viewYear: y, viewMonth: m } = state;
+  yogaMonthLbl.textContent = `${MONTH_NAMES[m]} ${y}`;
+  const tzOff = state.location.tzOffset;
+
+  // Build each yoga section
+  const sections = AUSPICIOUS_YOGAS.map(yoga => {
+    const sectionId = `yoga-sec-${yoga.name.replace(/\s+/g,'_')}`;
+    return `<div class="yoga-section" id="${sectionId}">
+      <div class="yoga-section-name">
+        <div class="yoga-dot" style="background:${yoga.color};"></div>
+        ${yoga.name}
+      </div>
+      <div class="yoga-desc">${yoga.desc}</div>
+      <div class="yoga-win-computing"><div class="yoga-win-spinner"></div> Computing…</div>
+    </div>`;
+  }).join('');
+  yogaList.innerHTML = sections;
+
+  // Fill each yoga section — yogas with windows() get time-range tables,
+  // others get simple day chips (from check() fallback).
+  AUSPICIOUS_YOGAS.forEach((yoga, i) => {
+    const sectionId = `yoga-sec-${yoga.name.replace(/\s+/g,'_')}`;
+    // Stagger async renders so the browser doesn't lock up
+    setTimeout(() => {
+      const section = document.getElementById(sectionId);
+      if (!section) return;
+      const contentSlot = section.querySelector('.yoga-win-computing')?.parentElement || section;
+
+      if (typeof yoga.windows === 'function') {
+        // Time-window yoga (e.g. Ravi Yoga)
+        const windows = yoga.windows(y, m, tzOff);
+
+        if (!windows.length) {
+          section.querySelector('.yoga-win-computing').outerHTML = `<div class="yoga-none">Coming Soon</div>`;
+          return;
+        }
+
+        // Build table rows grouped by calendar day
+        const rowsHtml = windows.map(({ d, startJD, endJD }) => {
+          const dateObj   = new Date(y, m, d);
+          const dow       = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dateObj.getDay()];
+          // Reference day for "different day" suffix detection
+          const refDateUTC = new Date(Date.UTC(y, m, d));
+          const startStr  = fmtJDlocal(startJD, tzOff, refDateUTC);
+          const endStr    = fmtJDlocal(endJD,   tzOff, refDateUTC);
+          return `<tr>
+            <td class="yoga-win-day" data-year="${y}" data-month="${m}" data-day="${d}">${d} ${MONTH_NAMES[m]}, ${dow}</td>
+            <td class="yoga-win-time">${startStr} → ${endStr}</td>
+          </tr>`;
+        }).join('');
+
+        const table = `<table class="yoga-windows-table">
+          <thead><tr><th>Day</th><th style="text-align:right">Window (${tzOff >= 0 ? '+' : ''}${tzOff}h)</th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>`;
+        section.querySelector('.yoga-win-computing').outerHTML = table;
+
+        // Click on day cell → select that date
+        section.querySelectorAll('td.yoga-win-day').forEach(td => {
+          td.style.cursor = 'pointer';
+          td.addEventListener('click', () => {
+            state.selectedDate = new Date(parseInt(td.dataset.year), parseInt(td.dataset.month), parseInt(td.dataset.day));
+            closeYogaDropdown();
+            renderCalendar();
+            loadHoras();
+            fetchSupabaseAstroData();
+          });
+        });
+
+      } else {
+        // Simple boolean check yoga — just show day chips
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const matchDays = [];
+        for (let d = 1; d <= daysInMonth; d++) {
+          const date = new Date(y, m, d);
+          const pan  = getPanchanga(date);
+          if (yoga.check(date, pan)) matchDays.push(d);
+        }
+
+        if (!matchDays.length) {
+          section.querySelector('.yoga-win-computing').outerHTML = `<div class="yoga-none">Coming Soon.</div>`;
+          return;
+        }
+
+        const chips = matchDays.map(d => {
+          const dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(y, m, d).getDay()];
+          return `<span class="yoga-date-chip" data-year="${y}" data-month="${m}" data-day="${d}" title="${dow}, ${d} ${MONTH_NAMES[m]}">${d}</span>`;
+        }).join('');
+
+        section.querySelector('.yoga-win-computing').outerHTML =
+          `<div class="yoga-dates">${chips}</div>`;
+
+        section.querySelectorAll('.yoga-date-chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            state.selectedDate = new Date(parseInt(chip.dataset.year), parseInt(chip.dataset.month), parseInt(chip.dataset.day));
+            closeYogaDropdown();
+            renderCalendar();
+            loadHoras();
+            fetchSupabaseAstroData();
+          });
+        });
+      }
+    }, i * 30);   // stagger: 30ms between each yoga section render
+  });
+}
+
+function openYogaDropdown() {
+  renderYogaDropdown();
+  yogaDropdown.classList.add('open');
+  yogaBtn.classList.add('open');
+}
+
+function closeYogaDropdown() {
+  yogaDropdown.classList.remove('open');
+  yogaBtn.classList.remove('open');
+}
+
+yogaBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  yogaDropdown.classList.contains('open') ? closeYogaDropdown() : openYogaDropdown();
+});
+
+// Close when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.yoga-btn-wrap')) closeYogaDropdown();
+});
+
+// Re-render dropdown content when month changes (without reopening)
+function refreshYogaDropdownIfOpen() {
+  if (yogaDropdown.classList.contains('open')) renderYogaDropdown();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+const MONTH_PANCHANGA_ENDPOINT = 'https://vyemohjvnvmjmxqvaqwd.supabase.co/functions/v1/month-panchanga-engine';
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5ZW1vaGp2bnZtam14cXZhcXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzM1MzQsImV4cCI6MjA5NTgwOTUzNH0.f_57Eo1OUZ4gjOtKVZrvXEHuuhIubzRzxZqcgpmtEOI";
+
+renderCalendar();
+// Select today by default
+const today = getNowAtLocation(state.location.tzOffset).dateObj;
+state.selectedDate = today;
+renderCalendar();
+loadHoras();
+fetchSupabaseAstroData();
+fetchMonthPanchanga(state.viewYear, state.viewMonth);
+
+// ─── MONTH PANCHANGA ENGINE ───────────────────────────────────────────────────
+// Fetches sunrise-evaluated panchanga for every day in a calendar month from
+// the month-panchanga-engine edge function. Populates state.panchangaCache in
+// bulk — one call covers all ~35 visible grid cells.
+//
+// Called on: initial load, month navigation (prev/next), location change,
+// ayanamsa change, and Today button. Deduped by "YYYY-MM" key so rapid
+// navigation never fires duplicate requests for the same month.
+
+async function fetchMonthPanchanga(year, month) {
+  // Build dedup key: "2026-06"
+  const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+  if (state.monthPanchangaFetching.has(monthKey)) return; // already in flight
+  state.monthPanchangaFetching.add(monthKey);
+
+  // Date range: first to last day of the month
+  const pad   = n => String(n).padStart(2, '0');
+  const mm    = pad(month + 1);
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const startDate = `${year}-${mm}-01`;
+  const endDate   = `${year}-${mm}-${pad(lastDay)}`;
+
+  // UTC offset string e.g. "+05:30" from the location's numeric tzOffset
+  const tzOff       = state.location.tzOffset;
+  const sign        = tzOff >= 0 ? '+' : '-';
+  const absOff      = Math.abs(tzOff);
+  const offH        = pad(Math.floor(absOff));
+  const offM        = pad(Math.round((absOff % 1) * 60));
+  const utcOffsetStr = `${sign}${offH}:${offM}`;
+
+  try {
+    const res = await fetch(MONTH_PANCHANGA_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ANON_KEY}`
+      },
+      body: JSON.stringify({
+        startDate,
+        endDate,
+        lat:           state.location.lat,
+        lng:           state.location.lng,
+        ayanamsaSystem:state.ayanamsa,
+        altitude:      state.location.altitude || 216,
+        utcOffsetStr
+      })
+    });
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.error || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json(); // { "YYYY-MM-DD": { tithiIdx, tithiShort, nakShort, phase, sankranti, … } }
+    console.log(`[month-panchanga] ${monthKey}: ${Object.keys(data).length} days received`);
+
+    // Merge into panchangaCache — only write; never overwrite entries already
+    // present with a _source:'server' tag (avoids a slower response from a
+    // previous location overwriting a fresher one from the current location).
+    for (const [key, pan] of Object.entries(data)) {
+      if (!state.panchangaCache[key] || state.panchangaCache[key]._source !== 'server') {
+        state.panchangaCache[key] = { ...pan, _source: 'server' };
+      }
+    }
+
+    // Re-render calendar to reflect the now-populated cache
+    if (state.viewYear === year && state.viewMonth === month) {
+      renderCalendar();
+    }
+
+  } catch (err) {
+    console.warn(`[month-panchanga] ${monthKey} fetch failed:`, err.message);
+    // Soft failure — calendar continues to show local Meeus approximations
+  } finally {
+    state.monthPanchangaFetching.delete(monthKey);
+  }
+}
+
+// ─── SUPABASE INTEGRATION ─────────────────────────────────────────────────────
+// Core coordinator to fetch planetary data from your Supabase backend
+async function fetchSupabaseAstroData() {
+  if (!state.selectedDate) return;
+
+  const rasiWrap = document.getElementById('rasiSvgWrap');
+  // NOTE: Do NOT replace rasiSvgWrap content here with a spinner — drawRasiChart()
+  // has already rendered the chart synchronously. The fetch runs in the background
+  // and calls window._drawRasiChart() when it resolves to refresh with Supabase data.
+
+  // REWRITE THESE with your actual project details
+  const PROJECT_ID = "https://vyemohjvnvmjmxqvaqwd.supabase.co"; 
+  const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5ZW1vaGp2bnZtam14cXZhcXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzM1MzQsImV4cCI6MjA5NTgwOTUzNH0.f_57Eo1OUZ4gjOtKVZrvXEHuuhIubzRzxZqcgpmtEOI";
+  const ENDPOINT = `https://vyemohjvnvmjmxqvaqwd.supabase.co/functions/v1/astro-engine`;
+
+  try {
+    const response = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ANON_KEY}`
+      },
+      body: JSON.stringify((() => {
+        const selDate = state.selectedDate;
+        const timeInput = document.getElementById('rasiChartTimeInput');
+
+        let hh, mm;
+        if (timeInput && timeInput.value && state.userSetTime) {
+          [hh, mm] = timeInput.value.split(':').map(s => parseInt(s, 10));
+        } else {
+          // Live fallback to the SELECTED LOCATION's current wall-clock time.
+          // Path: Current UTC (Date.now()) -> shift by the location's UTC
+          // offset -> read off local hours/minutes. This is NOT the
+          // browser/computer's own clock — it's "now" as it reads on a
+          // clock physically sitting at the selected location. Re-evaluated
+          // fresh on every call (not just at page load), so it stays live
+          // through location changes and the passage of time.
+          const locNow = getNowAtLocation(state.location.tzOffset);
+          hh = locNow.hours; mm = locNow.minutes;
+          // Keep the visible time picker in sync with what's actually being
+          // computed, so the UI doesn't look stuck on a stale value.
+          if (timeInput) {
+            timeInput.value = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+          }
+        }
+
+        // Build a true UTC instant for "selDate at hh:mm civil time at the
+        // selected location's UTC offset". This bypasses the browser's own
+        // system timezone entirely (Date.UTC + explicit offset subtraction),
+        // fixing the bug where formatDateWithTzOffset's offset shift was
+        // previously being applied on top of an already browser-local time.
+        const dateWithSelectedTime = civilToUTCDate(
+          selDate.getFullYear(), selDate.getMonth(), selDate.getDate(),
+          hh, mm, 0, state.location.tzOffset
+        );
+
+        return {
+          dateStr: formatDateWithTzOffset(dateWithSelectedTime, state.location.tzOffset),
+          lat: state.location.lat,
+          lng: state.location.lng,
+          ayanamsaSystem: state.ayanamsa,
+          altitude: state.location.altitude || 216,
+          computeTransitions: true
+        };
+      })())
+    });
+
+    if (!response.ok) throw new Error("Backend computation failed");
+    
+    const data = await response.json();
+    console.log("Supabase Astro Data Received:", data);
+
+    // Save to state — all downstream functions read from here
+    state.supabaseAstroData = data;
+
+    // Re-render the hora panel using cached params (no re-fetch of sunrise/sunset)
+    // so the panchanga transition rows (Tithi/Nakshatra/Yoga/Karana ends) show up
+    // now that state.supabaseAstroData.transitions is populated. Guard against a
+    // stale cache from a date the user has since navigated away from.
+    const lhr = state.lastHoraRender;
+    if (lhr && state.selectedDate && lhr.date.toDateString() === state.selectedDate.toDateString()) {
+      renderHoras(lhr.horas, lhr.specials, lhr.sunriseSec, lhr.sunsetSec, lhr.lmtAdj, lhr.date);
+    }
+
+    // Re-render the chart panel with fresh Supabase data now in state
+    if (window._drawRasiChart) window._drawRasiChart();
+
+  } catch (err) {
+    console.error("Failed to sync with Supabase Edge Function:", err);
+    if (rasiWrap) {
+      rasiWrap.innerHTML = `<div style="color:var(--red); font-size:12px; padding:10px 0; line-height:1.4;">
+        ✕ Connection Error to Astro Engine.<br>
+        <span style="font-family: var(--font-sans); font-variant-numeric: tabular-nums; background:rgba(0,0,0,0.05); padding:2px 4px; border-radius:3px; display:inline-block; margin-top:4px;">
+          Reason: ${err.message}
+        </span>
+      </div>`;
+    }
+  }
+}
+
+function renderSiderealHoroscope(data) {
+  const container = document.getElementById('rasiSvgWrap');
+  const timeLabel = document.getElementById('rasiChartTime');
+  if (!container) return;
+
+  // 1. Display the precise calculation engine metrics
+  if (timeLabel && data.julianDay) {
+    timeLabel.textContent = `JD ${data.julianDay.toFixed(4)} · Ayanāṃśa ${data.ayanamsaOffset?.toFixed(4) ?? '—'}°`;
+  }
+
+  // 2. Clear out the loader/spinner layout
+  container.innerHTML = "";
+
+  const planets = data.coordinates; // Unpacks: sun, moon, mercury, etc.
+
+  // 3. Build a clean, high-density dashboard sidebar card
+  // Planet display config: symbol + colour
+  const PLANET_DISPLAY = {
+    sun:       { label: 'Sun',       symbol: '☉', color: 'var(--hora-sun)' },
+    moon:      { label: 'Moon',      symbol: '☽', color: 'var(--hora-moon)' },
+    mercury:   { label: 'Mercury',   symbol: '☿', color: 'var(--hora-mercury)' },
+    venus:     { label: 'Venus',     symbol: '♀', color: 'var(--hora-venus)' },
+    mars:      { label: 'Mars',      symbol: '♂', color: 'var(--hora-mars)' },
+    jupiter:   { label: 'Jupiter',   symbol: '♃', color: 'var(--hora-jupiter)' },
+    saturn:    { label: 'Saturn',    symbol: '♄', color: 'var(--hora-saturn)' },
+    rahu:      { label: 'Rāhu',      symbol: '☊', color: '#7a5c3a' },
+    ketu:      { label: 'Ketu',      symbol: '☋', color: '#5a5a3a' },
+    ascendant: { label: 'Lagna',     symbol: '↑', color: 'var(--indigo2)' },
+  };
+
+  let html = `
+    <div class="rasi-panch-info" style="margin-top: 0; border-top: none;">
+      <div class="rasi-panch-heading" style="display: flex; justify-content: space-between; align-items: center; font-weight: 600;">
+        <span>Sidereal Longitudes</span>
+        <span style="font-size: 10px; background: rgba(30,27,75,0.08); border: 1px solid rgba(30,27,75,0.18); border-radius: 4px; padding: 2px 7px; color: var(--indigo2); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">
+          ${data.resolvedAyanamsaSystem?.toUpperCase() ?? 'LAHIRI'} · Supabase ✓
+        </span>
+      </div>
+  `;
+
+  // 4. Iterate over the returned coordinates map
+  for (const [planetName, props] of Object.entries(planets)) {
+    // If a specific planet failed internal tracking, display its error state gracefully
+    if (props.error) {
+      html += `
+        <div class="rasi-panch-row" style="color: var(--red);">
+          <span class="rasi-panch-key" style="text-transform: capitalize;">${planetName}</span>
+          <div class="rasi-panch-val" style="font-size: 11px;">✕ ${props.error}</div>
+        </div>`;
+      continue;
+    }
+
+    const pd = PLANET_DISPLAY[planetName] || { label: planetName, symbol: '·', color: 'var(--text3)' };
+
+    // Degrees + arc-minutes within sign
+    const deg = Math.floor(props.degreesInSign);
+    const min = Math.floor((props.degreesInSign - deg) * 60);
+
+    html += `
+      <div class="rasi-panch-row">
+        <span class="rasi-panch-key" style="display:flex; align-items:center; gap:5px;">
+          <span style="font-size:12px; color:${pd.color}; line-height:1;">${pd.symbol}</span>
+          <span style="text-transform: capitalize; font-weight: 600;">${pd.label}</span>
+        </span>
+        <div class="rasi-panch-val">
+          <span style="color: var(--text); margin-right: 4px;">${props.rashiName}</span>
+          <span class="rasi-panch-end" style="font-family: var(--font-sans); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--text2); display:inline-flex; align-items:center;">
+            ${deg.toString().padStart(2, '0')}°&nbsp;${min.toString().padStart(2, '0')}'
+          </span>
+        </div>
+      </div>`;
+  }
+
+  // 5. Handle Horizon Alerts (Polar daylight/night states if they ever trigger)
+  if (data.sunTimes.sunriseWarning || data.sunTimes.sunsetWarning) {
+    html += `
+      <div style="margin-top: 10px; padding: 6px 8px; font-size: 11px; background: rgba(255,165,0,0.08); border-left: 2px solid orange; color: var(--text2); line-height: 1.3;">
+        ⚠ ${data.sunTimes.sunriseWarning || data.sunTimes.sunsetWarning}
+      </div>`;
+  }
+
+  html += `
+    <div style="margin-top: 8px; padding: 5px 0 2px; font-size: 10px; color: var(--text3); line-height: 1.5; border-top: 1px dotted var(--border);">
+      All longitudes · Supabase Astro Engine (Swiss Ephemeris via astronomy-engine) ·
+      Sunrise/Sunset from <em>sunrise-sunset.org</em>
+    </div>
+  `;
+
+  html += `</div>`;
+  container.innerHTML = html;
+
+}
+
+// Initialize the time picker and listen for user changes
+const rasiTimeInput = document.getElementById('rasiChartTimeInput');
+if (rasiTimeInput) {
+  const initNow = getNowAtLocation(state.location.tzOffset);
+  rasiTimeInput.value = `${String(initNow.hours).padStart(2,'0')}:${String(initNow.minutes).padStart(2,'0')}`;
+  
+  rasiTimeInput.addEventListener('change', () => {
+    state.userSetTime = true;
+    if (state.selectedDate) {
+      fetchSupabaseAstroData();
+    }
+  });
+}
+
+// ─── FAQ & JOTFORM POPUP LOGIC ────────────────────────────────────────────────
+const faqBtn = document.getElementById('faqBtn');
+const faqPopup = document.getElementById('faqPopup');
+const faqOverlay = document.getElementById('faqPopupOverlay');
+const faqCloseBtn = document.getElementById('faqPopupClose');
+
+function openFaqPopup() {
+  faqPopup.style.display = 'flex';
+  faqOverlay.style.display = 'block';
+}
+
+function closeFaqPopup() {
+  faqPopup.style.display = 'none';
+  faqOverlay.style.display = 'none';
+}
+
+if (faqBtn) faqBtn.addEventListener('click', openFaqPopup);
+if (faqCloseBtn) faqCloseBtn.addEventListener('click', closeFaqPopup);
+if (faqOverlay) faqOverlay.addEventListener('click', closeFaqPopup);
+
+// Add to your current global Escape key listener if needed, or explicitly here:
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeFaqPopup();
+});
+
+</script>
+</body>
+</html>
