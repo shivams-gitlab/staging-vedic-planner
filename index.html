@@ -1,15 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-9DDZ1FT2TC"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-9DDZ1FT2TC');
-</script>  
+  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vedic Planner — Electional Astrology/Muhurta</title>
@@ -558,7 +550,7 @@
     font-weight: 500;
   }
   .nak-label {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     letter-spacing: 0;
     line-height: 1.3;
     font-style: italic;
@@ -567,7 +559,7 @@
     opacity: 0.72;
   }
   .tithi-label {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     line-height: 1.2;
     margin-top: 2px;
     opacity: 0.60;
@@ -818,7 +810,30 @@
     margin-top: 1px;
   }
 
-  /* HORA TABLE */
+  /* LAGNA NAVIGATION — prev/next buttons below retrograde legend */
+  .lagna-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 6px 0 2px;
+    font-size: 0.7rem;
+    color: var(--text3);
+  }
+  .lagna-nav-btn {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--indigo2);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    white-space: nowrap;
+  }
+  .lagna-nav-btn:hover { background: var(--bg3); border-color: var(--indigo2); }
+  .lagna-nav-btn:disabled { opacity: 0.35; cursor: default; }
   .hora-table-wrap {
     padding: 0;
     overflow-x: auto;
@@ -1077,7 +1092,55 @@
     font-family: var(--font-sans);
   }
 
-  /* SCHEDULED EVENT ROWS — Google Calendar day-view style */
+  /* AUSPICIOUS YOGA ROWS — coloured accent matching yoga theme */
+  .hora-table tr.yoga-event-row td {
+    padding: 7px 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .yoga-event-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .yoga-event-time {
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 3.2em;
+    flex-shrink: 0;
+  }
+  .yoga-event-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .yoga-event-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+  .yoga-event-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    line-height: 1;
+  }
+  .yoga-event-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .yoga-event-clip {
+    font-size: 0.7rem;
+    opacity: 0.55;
+    font-style: italic;
+    margin-left: 4px;
+  }
   .hora-table tr.scheduled-event-row td {
     padding: 0;
     border-bottom: 1px solid var(--bg3);
@@ -1421,10 +1484,10 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-brand">
+  <a href="/" class="nav-brand" style="text-decoration:none; cursor:pointer;" title="Vedic Planner — Home">
     <div class="brandmark"><!--☽--></div>
     <span>Vedic Planner</span>
-  </div>
+  </a>
 
   <button id="todayBtn">Today</button>
 
@@ -1522,8 +1585,8 @@
           <button id="yogaBtn">✦ Auspicious Yogas <span class="yoga-chevron">▾</span></button>
           <div class="yoga-dropdown" id="yogaDropdown">
             <div class="yoga-dropdown-header">
-              <span>COMING SOON</span>
               <span class="yoga-month-label" id="yogaMonthLabel"></span>
+              <span>Auspicious Yogas</span>              
             </div>
             <div id="yogaList"><div class="yoga-computing">Loading…</div></div>
           </div>
@@ -1684,6 +1747,9 @@ const state = {
                        // stays false for our own programmatic pre-fills, so
                        // fetchSupabaseAstroData knows whether to keep using a
                        // live "now at location" value or honor a fixed time.
+  userSetSeconds: 0,  // seconds component when navigating lagna boundaries;
+                       // the <input type="time"> only stores HH:MM so we carry
+                       // the seconds separately to avoid sub-minute stuck loops.
   panchangaCache: {},          // keyed by "YYYY-MM-DD" → panchanga data from month-panchanga-engine
   monthPanchangaFetching: new Set(), // tracks "YYYY-MM" keys currently in-flight
   events: loadStoredEvents()
@@ -2313,6 +2379,56 @@ async function loadHoras() {
   }
 }
 
+// Looks up the display colour for a yoga by name from AUSPICIOUS_YOGAS config.
+// Falls back to a neutral gold when the name isn't found (future-proof).
+function yogaColor(name) {
+  return AUSPICIOUS_YOGAS.find(y => y.name === name)?.color || '#c8860a';
+}
+
+// Converts an ISO local timestamp (e.g. "2026-07-10T06:15:22+05:30") to raw
+// LST seconds on the timeline, handling cross-midnight offsets relative to
+// the panel's display date. Uses the same day-diff logic as panchanga transitions.
+function localISOtoLSTsec(isoLocal, displayDate) {
+  if (!isoLocal) return null;
+  const [hh, mm, ss = '00'] = isoLocal.slice(11, 19).split(':');
+  const timeOfDaySec = parseInt(hh) * 3600 + parseInt(mm) * 60 + parseInt(ss);
+  const isoDateOnly = new Date(
+    parseInt(isoLocal.slice(0, 4), 10),
+    parseInt(isoLocal.slice(5, 7), 10) - 1,
+    parseInt(isoLocal.slice(8, 10), 10)
+  );
+  const dispDateOnly = new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate());
+  const dayDiff = Math.round((isoDateOnly - dispDateOnly) / 86400000);
+  return timeOfDaySec + dayDiff * 86400;
+}
+
+// ─── LAGNA NAVIGATION ────────────────────────────────────────────────────────
+// Defined at module level (not inside drawRasiChart) so button event listeners
+// always reference the same stable function — no stale-closure issues across
+// multiple drawRasiChart renders or double-invocations via window._drawRasiChart.
+function navigateToLagnaTime(isoLocal) {
+  if (!isoLocal || !state.selectedDate) return;
+  // Parse date components directly from ISO string — avoids browser timezone
+  // being applied on top of the location's timezone via the Date() constructor.
+  const targetYear  = parseInt(isoLocal.slice(0, 4), 10);
+  const targetMonth = parseInt(isoLocal.slice(5, 7), 10) - 1; // 0-indexed
+  const targetDay   = parseInt(isoLocal.slice(8, 10), 10);
+  const targetHHMM  = isoLocal.slice(11, 16); // "HH:MM"
+
+  // Advance selectedDate when the transition crosses midnight
+  const curY = state.selectedDate.getFullYear();
+  const curM = state.selectedDate.getMonth();
+  const curD = state.selectedDate.getDate();
+  if (targetYear !== curY || targetMonth !== curM || targetDay !== curD) {
+    state.selectedDate = new Date(targetYear, targetMonth, targetDay);
+    renderCalendar();
+  }
+
+  const inp = document.getElementById('rasiChartTimeInput');
+  if (inp) { inp.value = targetHHMM; state.userSetTime = true; }
+  fetchSupabaseAstroData();
+}
+
 function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
   const panel = document.getElementById('horaPanel');
   const locNow = getNowAtLocation(state.location.tzOffset);
@@ -2416,6 +2532,44 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
       }
     }
   }
+  // ── Auspicious yoga windows ───────────────────────────────────────────────────
+  const cachedDay = state.panchangaCache[dateKey(date)];
+  if (cachedDay?.yogaWindows?.length) {
+    const firstAt = horas.length ? horas[0].start : 0;
+    const lastAt  = horas.length ? horas[horas.length - 1].end : 86400;
+
+    for (const w of cachedDay.yogaWindows) {
+      const startSec = localISOtoLSTsec(w.startLocal, date);
+      const endSec   = localISOtoLSTsec(w.endLocal,   date);
+      if (startSec === null || endSec === null) continue;
+
+      // Skip windows whose end time is at or before sunrise — these are
+      // carry-overs from the previous day that crossed midnight but ended
+      // before this day's sunrise. They have no meaningful daytime presence
+      // and match the edge-function bug where a tail-end window appears as
+      // "↑ sunrise → 04:36" when sunrise itself is 04:36.
+      // Use a 5-minute buffer to match the yogasAtSunrise threshold.
+      if (endSec <= sunriseSec + 5 * 60) continue;
+
+      // Start event
+      if (startSec >= firstAt && startSec <= lastAt) {
+        allEvents.push({
+          type: 'yoga-start',
+          at:   startSec,
+          data: { name: w.name, clipped: w.clippedStart, color: yogaColor(w.name) }
+        });
+      }
+      // End event
+      if (endSec >= firstAt && endSec <= lastAt) {
+        allEvents.push({
+          type: 'yoga-end',
+          at:   endSec,
+          data: { name: w.name, clipped: w.clippedEnd, color: yogaColor(w.name) }
+        });
+      }
+    }
+  }
+
   // ── User-scheduled events ─────────────────────────────────────────────────────
   eventsForDate(date).forEach(ev => {
     allEvents.push({ type: 'scheduled', at: ev.startSec, data: ev });
@@ -2491,6 +2645,40 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
             <div class="pancha-change-body">
               <span class="pancha-change-label">${p.label}</span>
               <span class="pancha-change-name">→ ${p.nextName}<span class="pancha-change-tag">begins</span></span>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    } else if (ev.type === 'yoga-start') {
+      const w = ev.data;
+      const clipNote = w.clipped
+        ? `<span class="yoga-event-clip">active from sunrise</span>`
+        : '';
+      rows += `<tr class="yoga-event-row" style="background:${w.color}0d; border-left: 3px solid ${w.color}50;">
+        <td colspan="3">
+          <div class="yoga-event-cell">
+            <span class="yoga-event-time" style="color:${w.color};">${secToTime(ev.at, lmtAdj)}</span>
+            <div class="yoga-event-dot" style="background:${w.color};"></div>
+            <div class="yoga-event-body">
+              <span class="yoga-event-label" style="color:${w.color};">Yoga begins</span>
+              <span class="yoga-event-name" style="color:${w.color};">${w.name}${clipNote}</span>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    } else if (ev.type === 'yoga-end') {
+      const w = ev.data;
+      const clipNote = w.clipped
+        ? `<span class="yoga-event-clip">→ continues</span>`
+        : '';
+      rows += `<tr class="yoga-event-row" style="background:${w.color}07; border-left: 3px solid ${w.color}28;">
+        <td colspan="3">
+          <div class="yoga-event-cell">
+            <span class="yoga-event-time" style="color:${w.color}88;">${secToTime(ev.at, lmtAdj)}</span>
+            <div class="yoga-event-dot" style="background:${w.color}55;"></div>
+            <div class="yoga-event-body">
+              <span class="yoga-event-label" style="color:${w.color}88;">Yoga ends</span>
+              <span class="yoga-event-name" style="color:${w.color}aa;">${w.name}${clipNote}</span>
             </div>
           </div>
         </td>
@@ -2660,6 +2848,17 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
     const nakEnd    = trans?.nakshatra ? formatTransitionEnd(trans.nakshatra.endsLocal,  selDate) : '—';
     const yogaEnd   = trans?.yoga      ? formatTransitionEnd(trans.yoga.endsLocal,       selDate) : '—';
     const karanaEnd = trans?.karana    ? formatTransitionEnd(trans.karana.endsLocal,     selDate) : '—';
+    const lagnaEnd  = trans?.ascendant ? formatTransitionEnd(trans.ascendant.endsLocal,  selDate) : '—';
+
+    // Lagna nav: store the FULL ISO local string (not just HH:MM) so we can
+    // correctly handle transitions that cross midnight — the date component
+    // matters when selectedDate must advance to the next calendar day.
+    const lagnaStartISO = trans?.ascendant?.startsLocal ?? null;
+    const lagnaEndISO   = trans?.ascendant?.endsLocal   ?? null;
+
+    // Display label: HH:MM extracted for the button face only
+    const lagnaStartHHMM = lagnaStartISO ? lagnaStartISO.slice(11, 16) : null;
+    const lagnaEndHHMM   = lagnaEndISO   ? lagnaEndISO.slice(11, 16)   : null;
 
     const chartHtml = (grahas && lagna !== null)
       ? renderSouthIndianChart(lagna, grahas, chartSize)
@@ -2667,13 +2866,31 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
            Select a date to load chart from Supabase…
          </div>`;
 
+    // Lagna prev/next navigation buttons — jump the time picker to the
+    // start or end of the current lagna to step through lagna changes
+    const lagnaNavHtml = `
+      <div class="lagna-nav">
+        <button class="lagna-nav-btn" id="lagnaPrevBtn"
+          title="Jump to start of current lagna"
+          ${lagnaStartHHMM ? '' : 'disabled'}>
+          ◀ ${lagnaStartHHMM ?? '—'}
+        </button>
+        <span style="opacity:0.45;">Lagna</span>
+        <button class="lagna-nav-btn" id="lagnaNextBtn"
+          title="Jump to start of next lagna"
+          ${lagnaEndHHMM ? '' : 'disabled'}>
+          ${lagnaEndHHMM ?? '—'} ▶
+        </button>
+      </div>`;
+
     wrap.innerHTML = chartHtml + `
-      <div style="font-size:10px; color:var(--text3);  text-align:center;">℞ retrograde</div>
+      <div style="font-size:10px; color:var(--text3); text-align:center;">℞ retrograde</div>
+      ${lagnaNavHtml}
       <div class="rasi-panch-info">
         <div class="rasi-panch-heading">Pañcāṅga at time selected</div>
         <div class="rasi-panch-row">
           <span class="rasi-panch-key">Lagna</span>
-          <span class="rasi-panch-val">${lagnaRasiName} ${lagDeg}°</span>
+          <span class="rasi-panch-val">${lagnaRasiName} ${lagDeg}°<span class="rasi-panch-end">${lagnaEnd}</span></span>
         </div>
         <div class="rasi-panch-row">
           <span class="rasi-panch-key">Vara</span>
@@ -2681,21 +2898,91 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
         </div>
         <div class="rasi-panch-row">
           <span class="rasi-panch-key">Tithi</span>
-          <span class="rasi-panch-val">${sunrisePan.tithiName}<span class="rasi-panch-end">${tithiEnd}</span></span>
+          <span class="rasi-panch-val">${sunrisePan?.tithiName ?? '—'}<span class="rasi-panch-end">${tithiEnd}</span></span>
         </div>
         <div class="rasi-panch-row">
           <span class="rasi-panch-key">Nakṣatra</span>
-          <span class="rasi-panch-val">${sunrisePan.nakName}<span class="rasi-panch-end">${nakEnd}</span></span>
+          <span class="rasi-panch-val">${sunrisePan?.nakName ?? '—'}<span class="rasi-panch-end">${nakEnd}</span></span>
         </div>
         <div class="rasi-panch-row">
           <span class="rasi-panch-key">Yoga</span>
-          <span class="rasi-panch-val">${sunrisePan.yogaName}<span class="rasi-panch-end">${yogaEnd}</span></span>
+          <span class="rasi-panch-val">${sunrisePan?.yogaName ?? '—'}<span class="rasi-panch-end">${yogaEnd}</span></span>
         </div>
         <div class="rasi-panch-row">
           <span class="rasi-panch-key">Karaṇa</span>
-          <span class="rasi-panch-val">${sunrisePan.karanaName}<span class="rasi-panch-end">${karanaEnd}</span></span>
+          <span class="rasi-panch-val">${sunrisePan?.karanaName ?? '—'}<span class="rasi-panch-end">${karanaEnd}</span></span>
         </div>
       </div>`;
+
+    // Wire lagna nav buttons — navigate to the full ISO local timestamp,
+    // updating selectedDate when the transition crosses midnight.
+    //
+    // Using the full isoLocal string (e.g. "2026-07-12T00:22:00+05:30") rather
+    // than just HH:MM avoids two bugs:
+    //   1. Clicking next on a lagna ending after midnight would set the time
+    //      input to "00:22" on the same date — fetching the PREVIOUS night's
+    //      chart instead of the next morning's.
+    //   2. Subsequent next clicks would hit the same midnight boundary and freeze.
+    const navigateToLagnaTime = (isoLocal) => {
+      if (!isoLocal || !state.selectedDate) return;
+      // Parse the date component from the ISO string directly — don't use Date()
+      // constructor which would apply local browser timezone, not the location's tz.
+      const targetYear  = parseInt(isoLocal.slice(0, 4), 10);
+      const targetMonth = parseInt(isoLocal.slice(5, 7), 10) - 1; // 0-indexed
+      const targetDay   = parseInt(isoLocal.slice(8, 10), 10);
+      const targetHHMM  = isoLocal.slice(11, 16); // "HH:MM"
+
+      // Advance selectedDate if the target falls on a different calendar day
+      const curY = state.selectedDate.getFullYear();
+      const curM = state.selectedDate.getMonth();
+      const curD = state.selectedDate.getDate();
+      if (targetYear !== curY || targetMonth !== curM || targetDay !== curD) {
+        state.selectedDate = new Date(targetYear, targetMonth, targetDay);
+        renderCalendar(); // refresh calendar to highlight the new selected date
+      }
+
+      // Update the time picker and trigger a fresh chart computation.
+      // The <input type="time"> only stores HH:MM — we carry the full seconds
+      // in state.userSetSeconds so fetchSupabaseAstroData can use them.
+      // Add 1 second past the boundary to ensure we land inside the next lagna,
+      // not exactly on the transition point where results are ambiguous.
+      const rawSS = parseInt(isoLocal.slice(17, 19) || '0', 10);
+      const totalSec = parseInt(targetHHMM.slice(0, 2), 10) * 3600
+                     + parseInt(targetHHMM.slice(3, 5), 10) * 60
+                     + rawSS + 1; // +1 second past the boundary
+      const adjHH  = String(Math.floor(totalSec / 3600) % 24).padStart(2, '0');
+      const adjMM  = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+      const adjSS  = totalSec % 60;
+
+      const inp = document.getElementById('rasiChartTimeInput');
+      if (inp) { inp.value = `${adjHH}:${adjMM}`; state.userSetTime = true; }
+      state.userSetSeconds = adjSS;
+      fetchSupabaseAstroData();
+    };
+
+    // Wire lagna nav buttons — read transitions from state.supabaseAstroData
+    // at click time, NOT from the closed-over lagnaStartISO/lagnaEndISO.
+    //
+    // Critical: drawRasiChart is called repeatedly (once per fetchSupabaseAstroData
+    // response). Each call creates a new closure with its own lagnaStartISO /
+    // lagnaEndISO captured at render time. window._drawRasiChart stores the latest
+    // closure, but the buttons still hold a reference to the closure from the
+    // PREVIOUS render — so clicking next a second time would navigate to the same
+    // ISO string as the first click, appearing frozen.
+    //
+    // Reading from state.supabaseAstroData.transitions.ascendant at click time
+    // always reflects the most recent response regardless of which closure
+    // created the button.
+    const prevBtn = document.getElementById('lagnaPrevBtn');
+    const nextBtn = document.getElementById('lagnaNextBtn');
+    if (prevBtn) prevBtn.addEventListener('click', () => {
+      const iso = state.supabaseAstroData?.transitions?.ascendant?.startsLocal;
+      if (iso) navigateToLagnaTime(iso);
+    });
+    if (nextBtn) nextBtn.addEventListener('click', () => {
+      const iso = state.supabaseAstroData?.transitions?.ascendant?.endsLocal;
+      if (iso) navigateToLagnaTime(iso);
+    });
   }
   window._drawRasiChart = drawRasiChart; // expose to fetchSupabaseAstroData
   drawRasiChart();
@@ -3185,82 +3472,65 @@ const AUSPICIOUS_YOGAS = [
     desc: 'Moon occupies the 4th, 6th, 9th, 10th, 13th, or 20th nakshatra from the Sun\'s nakshatra. Bestows fame, success, and governmental favour.',
     color: '#c8860a',
     check(date, pan) {
-      // STUB
-      return false;
+      return pan?.yogas?.includes('Ravi Yoga') ?? false;
     }
   },
   {
     name: 'Sarvartha Siddhi Yoga',
     desc: 'A highly auspicious combination of Vara, Tithi, and Nakshatra. All undertakings begun in this yoga reach successful completion.',
     color: '#6b4e9e',
-    // Condition: specific Vara + Nakshatra pairs (varies by classical source)
-    // Common table: Sun+Hasta, Sun+Pushya, Mon+Rohini, Mon+Mrigashira, Tue+Ashwini, etc.
     check(date, pan) {
-      // STUB
-      return false;
+      return pan?.yogas?.includes('Sarvartha Siddhi Yoga') ?? false;
     }
   },
   {
     name: 'Amrit Siddhi Yoga',
     desc: 'Considered the nectar of all yogas. Formed by specific Vara–Nakshatra combinations; extremely rare and highly powerful.',
     color: '#1a5c1a',
-    // Condition: Sun+Hasta, Mon+Mrigashira, Tue+Ashwini, Wed+Anuradha,
-    //            Thu+Pushya, Fri+Revati, Sat+Rohini
     check(date, pan) {
-      // STUB
-      return false;
+      return pan?.yogas?.includes('Amrit Siddhi Yoga') ?? false;
     }
   },
-  {
+  /*{
     name: 'Dwipushkar Yoga',
     desc: 'Actions performed during this yoga yield double results. Formed on Tuesday, Saturday, or Sunday with specific tithis and nakshatras.',
     color: '#2a5a5a',
-    // Condition: (Tue/Sat/Sun) + (Dvitiya/Saptami/Dvadashi tithi) + (Krittika/Punarvasu/Vishakha nak)
     check(date, pan) {
-      // STUB
-      return false;
+      return pan?.yogas?.includes('Dwipushkar Yoga') ?? false;
     }
   },
   {
     name: 'Tripushkar Yoga',
     desc: 'Actions yield triple results. Very rare. Formed on Wednesday, Friday, or Sunday with specific tithis and nakshatras.',
     color: '#8b2020',
-    // Condition: (Wed/Fri/Sun) + (Tritiya/Ashtami/Trayodashi tithi) + (Krittika/Punarvasu/Uttara Phalguni/Vishakha/Uttarashada/Purva Bhadra nak)
     check(date, pan) {
-      // STUB
-      return false;
+      return pan?.yogas?.includes('Tripushkar Yoga') ?? false;
     }
-  },
+  },*/
   {
     name: 'Ravi Pushya Yoga',
     desc: 'Pushya nakshatra falling on a Sunday. One of the most auspicious yogas for beginning new ventures, purchases, and initiations.',
     color: '#c8860a',
-    // Condition: Sunday (dow 0) AND Pushya nakshatra (nakIdx 7)
     check(date, pan) {
-      // STUB — replace with: return date.getDay() === 0 && pan.nakIdx === 7;
-      return false;
+      return pan?.yogas?.includes('Ravi Pushya Yoga') ?? false;
     }
   },
   {
     name: 'Guru Pushya Yoga',
     desc: 'Pushya nakshatra falling on a Thursday. Exceptionally auspicious for learning, initiation into mantra, and beginning education.',
     color: '#6b4e9e',
-    // Condition: Thursday (dow 4) AND Pushya nakshatra (nakIdx 7)
     check(date, pan) {
-      // STUB — replace with: return date.getDay() === 4 && pan.nakIdx === 7;
-      return false;
+      return pan?.yogas?.includes('Guru Pushya Yoga') ?? false;
     }
   },
-  {
+  /*{
     name: 'Maitreya Yoga',
     desc: 'Formed by a benefic Vara–Nakshatra combination. Associated with friendship, harmony, and the fulfilment of benevolent desires.',
     color: '#4a6080',
-    // Condition: varies — one common definition: Monday + Rohini or Mrigashira
     check(date, pan) {
-      // STUB
-      return false;
+      return pan?.yogas?.includes('Maitreya Yoga') ?? false;
     }
-  },
+  },*/
 ];
 
 // ─── YOGA MONTHLY COMPUTATION ─────────────────────────────────────────────────
@@ -3293,107 +3563,85 @@ const MONTH_NAMES = ['January','February','March','April','May','June',
 function renderYogaDropdown() {
   const { viewYear: y, viewMonth: m } = state;
   yogaMonthLbl.textContent = `${MONTH_NAMES[m]} ${y}`;
-  const tzOff = state.location.tzOffset;
+  const tzOff   = state.location.tzOffset;
+  const pad2    = n => String(n).padStart(2, '0');
+  const fmtTime = iso => iso ? `${iso.slice(11, 16)}` : '—';
 
-  // Build each yoga section
+  // Gather all yogaWindows across the month from the cache, grouped by yoga name
+  const byName = {}; // yogaName → [{ day, startLocal, endLocal, clippedStart, clippedEnd }]
+  AUSPICIOUS_YOGAS.forEach(y => { byName[y.name] = []; });
+
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key    = `${y}-${pad2(m + 1)}-${pad2(d)}`;
+    const cached = state.panchangaCache[key];
+    if (!cached?.yogaWindows) continue;
+    for (const w of cached.yogaWindows) {
+      if (byName[w.name] !== undefined) {
+        byName[w.name].push({ d, ...w });
+      }
+    }
+  }
+
+  // Check if cache is still loading (any day has _source:'loading')
+  const stillLoading = Array.from({length: daysInMonth}, (_, i) => i + 1)
+    .some(d => state.panchangaCache[`${y}-${pad2(m+1)}-${pad2(d)}`]?._source === 'loading'
+            || !state.panchangaCache[`${y}-${pad2(m+1)}-${pad2(d)}`]);
+
   const sections = AUSPICIOUS_YOGAS.map(yoga => {
+    const windows = byName[yoga.name];
     const sectionId = `yoga-sec-${yoga.name.replace(/\s+/g,'_')}`;
+
+    let content;
+    if (stillLoading && !windows.length) {
+      content = `<div class="yoga-none">Loading…</div>`;
+    } else if (!windows.length) {
+      content = `<div class="yoga-none">None this month.</div>`;
+    } else {
+      const rowsHtml = windows.map(w => {
+        const date = new Date(y, m, w.d);
+        const dow  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][date.getDay()];
+        const startStr = w.clippedStart
+          ? `<span title="active from sunrise" style="opacity:0.65;">↑ sunrise</span>`
+          : fmtTime(w.startLocal);
+        const endStr = w.clippedEnd
+          ? `<span title="continues beyond day" style="opacity:0.65;">→ cont.</span>`
+          : fmtTime(w.endLocal);
+        return `<tr>
+          <td class="yoga-win-day" data-year="${y}" data-month="${m}" data-day="${w.d}"
+              style="cursor:pointer;">${w.d} ${MONTH_NAMES[m]}, ${dow}</td>
+          <td class="yoga-win-time">${startStr} → ${endStr}</td>
+        </tr>`;
+      }).join('');
+
+      content = `<table class="yoga-windows-table">
+        <thead><tr><th>Day</th><th style="text-align:right">Window (${tzOff >= 0 ? '+' : ''}${tzOff}h)</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>`;
+    }
+
     return `<div class="yoga-section" id="${sectionId}">
       <div class="yoga-section-name">
         <div class="yoga-dot" style="background:${yoga.color};"></div>
         ${yoga.name}
       </div>
-      <div class="yoga-desc">${yoga.desc}</div>
-      <div class="yoga-win-computing"><div class="yoga-win-spinner"></div> Computing…</div>
+      ${content}
     </div>`;
   }).join('');
+
   yogaList.innerHTML = sections;
 
-  // Fill each yoga section — yogas with windows() get time-range tables,
-  // others get simple day chips (from check() fallback).
-  AUSPICIOUS_YOGAS.forEach((yoga, i) => {
-    const sectionId = `yoga-sec-${yoga.name.replace(/\s+/g,'_')}`;
-    // Stagger async renders so the browser doesn't lock up
-    setTimeout(() => {
-      const section = document.getElementById(sectionId);
-      if (!section) return;
-      const contentSlot = section.querySelector('.yoga-win-computing')?.parentElement || section;
-
-      if (typeof yoga.windows === 'function') {
-        // Time-window yoga (e.g. Ravi Yoga)
-        const windows = yoga.windows(y, m, tzOff);
-
-        if (!windows.length) {
-          section.querySelector('.yoga-win-computing').outerHTML = `<div class="yoga-none">Coming Soon</div>`;
-          return;
-        }
-
-        // Build table rows grouped by calendar day
-        const rowsHtml = windows.map(({ d, startJD, endJD }) => {
-          const dateObj   = new Date(y, m, d);
-          const dow       = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dateObj.getDay()];
-          // Reference day for "different day" suffix detection
-          const refDateUTC = new Date(Date.UTC(y, m, d));
-          const startStr  = fmtJDlocal(startJD, tzOff, refDateUTC);
-          const endStr    = fmtJDlocal(endJD,   tzOff, refDateUTC);
-          return `<tr>
-            <td class="yoga-win-day" data-year="${y}" data-month="${m}" data-day="${d}">${d} ${MONTH_NAMES[m]}, ${dow}</td>
-            <td class="yoga-win-time">${startStr} → ${endStr}</td>
-          </tr>`;
-        }).join('');
-
-        const table = `<table class="yoga-windows-table">
-          <thead><tr><th>Day</th><th style="text-align:right">Window (${tzOff >= 0 ? '+' : ''}${tzOff}h)</th></tr></thead>
-          <tbody>${rowsHtml}</tbody>
-        </table>`;
-        section.querySelector('.yoga-win-computing').outerHTML = table;
-
-        // Click on day cell → select that date
-        section.querySelectorAll('td.yoga-win-day').forEach(td => {
-          td.style.cursor = 'pointer';
-          td.addEventListener('click', () => {
-            state.selectedDate = new Date(parseInt(td.dataset.year), parseInt(td.dataset.month), parseInt(td.dataset.day));
-            closeYogaDropdown();
-            renderCalendar();
-            loadHoras();
-            fetchSupabaseAstroData();
-          });
-        });
-
-      } else {
-        // Simple boolean check yoga — just show day chips
-        const daysInMonth = new Date(y, m + 1, 0).getDate();
-        const matchDays = [];
-        for (let d = 1; d <= daysInMonth; d++) {
-          const date = new Date(y, m, d);
-          const pan  = getPanchanga(date);
-          if (yoga.check(date, pan)) matchDays.push(d);
-        }
-
-        if (!matchDays.length) {
-          section.querySelector('.yoga-win-computing').outerHTML = `<div class="yoga-none">Coming Soon.</div>`;
-          return;
-        }
-
-        const chips = matchDays.map(d => {
-          const dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(y, m, d).getDay()];
-          return `<span class="yoga-date-chip" data-year="${y}" data-month="${m}" data-day="${d}" title="${dow}, ${d} ${MONTH_NAMES[m]}">${d}</span>`;
-        }).join('');
-
-        section.querySelector('.yoga-win-computing').outerHTML =
-          `<div class="yoga-dates">${chips}</div>`;
-
-        section.querySelectorAll('.yoga-date-chip').forEach(chip => {
-          chip.addEventListener('click', () => {
-            state.selectedDate = new Date(parseInt(chip.dataset.year), parseInt(chip.dataset.month), parseInt(chip.dataset.day));
-            closeYogaDropdown();
-            renderCalendar();
-            loadHoras();
-            fetchSupabaseAstroData();
-          });
-        });
-      }
-    }, i * 30);   // stagger: 30ms between each yoga section render
+  // Wire click handlers for day rows
+  yogaList.querySelectorAll('td.yoga-win-day').forEach(td => {
+    td.addEventListener('click', () => {
+      state.selectedDate = new Date(
+        parseInt(td.dataset.year), parseInt(td.dataset.month), parseInt(td.dataset.day)
+      );
+      closeYogaDropdown();
+      renderCalendar();
+      loadHoras();
+      fetchSupabaseAstroData();
+    });
   });
 }
 
@@ -3423,10 +3671,19 @@ function refreshYogaDropdownIfOpen() {
   if (yogaDropdown.classList.contains('open')) renderYogaDropdown();
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-const MONTH_PANCHANGA_ENDPOINT = 'https://vyemohjvnvmjmxqvaqwd.supabase.co/functions/v1/month-panchanga-engine';
-const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5ZW1vaGp2bnZtam14cXZhcXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzM1MzQsImV4cCI6MjA5NTgwOTUzNH0.f_57Eo1OUZ4gjOtKVZrvXEHuuhIubzRzxZqcgpmtEOI";
+// ─── MONTH PANCHANGA ENGINE ───────────────────────────────────────────────────
+// Fetches sunrise-evaluated panchanga for every day in a calendar month from
+// the month-panchanga-engine edge function. Populates state.panchangaCache in
+// bulk — one call covers all ~35 visible grid cells.
+//
+// Called on: initial load, month navigation (prev/next), location change,
+// ayanamsa change, and Today button. Deduped by "YYYY-MM" key so rapid
+// navigation never fires duplicate requests for the same month.
 
+const MONTH_PANCHANGA_ENDPOINT = 'https://vyemohjvnvmjmxqvaqwd.supabase.co/functions/v1/staging-month-panchanga';
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5ZW1vaGp2bnZtam14cXZhcXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzM1MzQsImV4cCI6MjA5NTgwOTUzNH0.f_57Eo1OUZ4gjOtKVZrvXEHuuhIubzRzxZqcgpmtEOI";
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 renderCalendar();
 // Select today by default
 const today = getNowAtLocation(state.location.tzOffset).dateObj;
@@ -3471,7 +3728,7 @@ async function fetchMonthPanchanga(year, month) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ANON_KEY}`
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         startDate,
@@ -3501,14 +3758,15 @@ async function fetchMonthPanchanga(year, month) {
       }
     }
 
-    // Re-render calendar to reflect the now-populated cache
+    // Re-render calendar and yoga dropdown (if open) to reflect populated cache
     if (state.viewYear === year && state.viewMonth === month) {
       renderCalendar();
+      refreshYogaDropdownIfOpen();
     }
 
   } catch (err) {
     console.warn(`[month-panchanga] ${monthKey} fetch failed:`, err.message);
-    // Soft failure — calendar continues to show local Meeus approximations
+    // Soft failure — calendar cells remain in loading state ('…') until next retry
   } finally {
     state.monthPanchangaFetching.delete(monthKey);
   }
@@ -3524,25 +3782,28 @@ async function fetchSupabaseAstroData() {
   // has already rendered the chart synchronously. The fetch runs in the background
   // and calls window._drawRasiChart() when it resolves to refresh with Supabase data.
 
-  // REWRITE THESE with your actual project details
-  const PROJECT_ID = "https://vyemohjvnvmjmxqvaqwd.supabase.co"; 
-  const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5ZW1vaGp2bnZtam14cXZhcXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzM1MzQsImV4cCI6MjA5NTgwOTUzNH0.f_57Eo1OUZ4gjOtKVZrvXEHuuhIubzRzxZqcgpmtEOI";
-  const ENDPOINT = `https://vyemohjvnvmjmxqvaqwd.supabase.co/functions/v1/astro-engine`;
+  const PROJECT_ID = "https://vyemohjvnvmjmxqvaqwd.supabase.co";
+  const ENDPOINT   = `https://vyemohjvnvmjmxqvaqwd.supabase.co/functions/v1/astro-engine`;
 
   try {
     const response = await fetch(ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ANON_KEY}`
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify((() => {
         const selDate = state.selectedDate;
         const timeInput = document.getElementById('rasiChartTimeInput');
 
-        let hh, mm;
+        let hh, mm, ss;
         if (timeInput && timeInput.value && state.userSetTime) {
           [hh, mm] = timeInput.value.split(':').map(s => parseInt(s, 10));
+          // Use stored seconds from lagna navigation (avoids sub-minute stuck loop).
+          // Reset to 0 after use so a subsequent manual time-picker change starts
+          // fresh without inheriting stale seconds from a previous navigation.
+          ss = state.userSetSeconds ?? 0;
+          state.userSetSeconds = 0;
         } else {
           // Live fallback to the SELECTED LOCATION's current wall-clock time.
           // Path: Current UTC (Date.now()) -> shift by the location's UTC
@@ -3552,7 +3813,7 @@ async function fetchSupabaseAstroData() {
           // fresh on every call (not just at page load), so it stays live
           // through location changes and the passage of time.
           const locNow = getNowAtLocation(state.location.tzOffset);
-          hh = locNow.hours; mm = locNow.minutes;
+          hh = locNow.hours; mm = locNow.minutes; ss = locNow.seconds ?? 0;
           // Keep the visible time picker in sync with what's actually being
           // computed, so the UI doesn't look stuck on a stale value.
           if (timeInput) {
@@ -3560,14 +3821,14 @@ async function fetchSupabaseAstroData() {
           }
         }
 
-        // Build a true UTC instant for "selDate at hh:mm civil time at the
+        // Build a true UTC instant for "selDate at hh:mm:ss civil time at the
         // selected location's UTC offset". This bypasses the browser's own
         // system timezone entirely (Date.UTC + explicit offset subtraction),
         // fixing the bug where formatDateWithTzOffset's offset shift was
         // previously being applied on top of an already browser-local time.
         const dateWithSelectedTime = civilToUTCDate(
           selDate.getFullYear(), selDate.getMonth(), selDate.getDate(),
-          hh, mm, 0, state.location.tzOffset
+          hh, mm, ss, state.location.tzOffset
         );
 
         return {
@@ -3593,13 +3854,19 @@ async function fetchSupabaseAstroData() {
     // so the panchanga transition rows (Tithi/Nakshatra/Yoga/Karana ends) show up
     // now that state.supabaseAstroData.transitions is populated. Guard against a
     // stale cache from a date the user has since navigated away from.
+    //
+    // NOTE: renderHoras calls drawRasiChart() internally at the end of its own
+    // execution — so window._drawRasiChart() must NOT be called here separately.
+    // Calling it again would re-render rasiSvgWrap.innerHTML a second time,
+    // destroying the button elements that drawRasiChart just wired up, leaving
+    // the next/prev lagna buttons with no event listeners on the second click.
     const lhr = state.lastHoraRender;
     if (lhr && state.selectedDate && lhr.date.toDateString() === state.selectedDate.toDateString()) {
       renderHoras(lhr.horas, lhr.specials, lhr.sunriseSec, lhr.sunsetSec, lhr.lmtAdj, lhr.date);
+    } else {
+      // hora panel not applicable (different date) — redraw chart directly
+      if (window._drawRasiChart) window._drawRasiChart();
     }
-
-    // Re-render the chart panel with fresh Supabase data now in state
-    if (window._drawRasiChart) window._drawRasiChart();
 
   } catch (err) {
     console.error("Failed to sync with Supabase Edge Function:", err);
