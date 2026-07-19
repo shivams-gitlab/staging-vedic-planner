@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vedic Planner — Electional Astrology/Muhurta</title>
@@ -1624,7 +1624,7 @@
       <div class="rasi-chart-title">
         <span>Sidereal Horoscope</span>
       </div>  
-        <input type="time" id="rasiChartTimeInput" class="rasi-chart-time-input">
+        <input type="time" id="rasiChartTimeInput" class="rasi-chart-time-input" step="1">
     </div>
     <div class="rasi-svg-wrap" id="rasiSvgWrap">
       <div style="color:rgba(212,200,168,0.4);font-size:12px;padding:10px 0;">Select a date…</div>
@@ -1747,9 +1747,6 @@ const state = {
                        // stays false for our own programmatic pre-fills, so
                        // fetchSupabaseAstroData knows whether to keep using a
                        // live "now at location" value or honor a fixed time.
-  userSetSeconds: 0,  // seconds component when navigating lagna boundaries;
-                       // the <input type="time"> only stores HH:MM so we carry
-                       // the seconds separately to avoid sub-minute stuck loops.
   panchangaCache: {},          // keyed by "YYYY-MM-DD" → panchanga data from month-panchanga-engine
   monthPanchangaFetching: new Set(), // tracks "YYYY-MM" keys currently in-flight
   events: loadStoredEvents()
@@ -2413,7 +2410,7 @@ function navigateToLagnaTime(isoLocal) {
   const targetYear  = parseInt(isoLocal.slice(0, 4), 10);
   const targetMonth = parseInt(isoLocal.slice(5, 7), 10) - 1; // 0-indexed
   const targetDay   = parseInt(isoLocal.slice(8, 10), 10);
-  const targetHHMM  = isoLocal.slice(11, 16); // "HH:MM"
+  const targetHHMMSS = isoLocal.slice(11, 19); // HH:MM:SS
 
   // Advance selectedDate when the transition crosses midnight
   const curY = state.selectedDate.getFullYear();
@@ -2425,7 +2422,7 @@ function navigateToLagnaTime(isoLocal) {
   }
 
   const inp = document.getElementById('rasiChartTimeInput');
-  if (inp) { inp.value = targetHHMM; state.userSetTime = true; }
+  if (inp) { inp.value = targetHHMMSS; state.userSetTime = true; }
   fetchSupabaseAstroData();
 }
 
@@ -2839,7 +2836,10 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
          'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'][Math.floor(lagna/30)]
       : '—';
     const lagDeg = lagna !== null ? (lagna % 30).toFixed(1) : '—';
-    const varaName = VARA_NAMES[(state.selectedDate || new Date()).getDay()];
+    // Vara — read from Supabase response (anchored to sunrise of this date).
+    // Falls back to local JS computation only if the response predates this field.
+    const varaName = sb?.vara?.name
+      ?? VARA_NAMES[(state.lastHoraRender?.date || state.selectedDate || new Date()).getDay()];
 
     // Transition end-times — from data.transitions (server binary-search result)
     const trans = sb?.transitions;
@@ -2941,23 +2941,14 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
         renderCalendar(); // refresh calendar to highlight the new selected date
       }
 
-      // Update the time picker and trigger a fresh chart computation.
-      // The <input type="time"> only stores HH:MM — we carry the full seconds
-      // in state.userSetSeconds so fetchSupabaseAstroData can use them.
-      // Add 1 second past the boundary to ensure we land inside the next lagna,
-      // not exactly on the transition point where results are ambiguous.
-      const rawSS = parseInt(isoLocal.slice(17, 19) || '0', 10);
-      const totalSec = parseInt(targetHHMM.slice(0, 2), 10) * 3600
-                     + parseInt(targetHHMM.slice(3, 5), 10) * 60
-                     + rawSS + 1; // +1 second past the boundary
-      const adjHH  = String(Math.floor(totalSec / 3600) % 24).padStart(2, '0');
-      const adjMM  = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
-      const adjSS  = totalSec % 60;
-
+      // Store the full HH:MM:SS in the time input (step="1" enables seconds).
+      // No offset arithmetic needed — the ISO string is the source of truth.
+      const fullTime = isoLocal.slice(11, 19); // "HH:MM:SS"
       const inp = document.getElementById('rasiChartTimeInput');
-      if (inp) { inp.value = `${adjHH}:${adjMM}`; state.userSetTime = true; }
-      state.userSetSeconds = adjSS;
+      if (inp) { inp.value = fullTime; state.userSetTime = true; }
+      console.log("Sending", fullTime);
       fetchSupabaseAstroData();
+      console.log(state.supabaseAstroData.transitions.ascendant.startsLocal, state.supabaseAstroData.transitions.ascendant.endsLocal);  
     };
 
     // Wire lagna nav buttons — read transitions from state.supabaseAstroData
@@ -2975,13 +2966,77 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
     // created the button.
     const prevBtn = document.getElementById('lagnaPrevBtn');
     const nextBtn = document.getElementById('lagnaNextBtn');
+        
+    /**
+     * Returns a new ISO local timestamp offset by the specified number of seconds.
+     * Used exclusively for Lagna navigation so button clicks always request a
+     * timestamp that lies *inside* the destination lagna instead of exactly on
+     * the transition boundary.
+     * Example:
+     *   offsetIsoSeconds("2026-07-13T17:24:18+05:30", +1)
+     *     -> "2026-07-13T17:24:19+05:30"
+     *
+     *   offsetIsoSeconds("2026-07-13T00:00:00+05:30", -1)
+     *     -> "2026-07-12T23:59:59+05:30"
+     * Preserves the original UTC offset and correctly handles day/month/year
+     * rollovers.
+     *
+     * param {string} isoLocal ISO-8601 local timestamp with UTC offset.
+     * param {number} deltaSeconds Number of seconds to add (or subtract).
+     * returns {string} Adjusted ISO-8601 local timestamp.
+     */
+
+    function offsetIsoSeconds(iso, deltaSeconds) {
+      // Parse manually to avoid browser timezone conversions
+      const y  = +iso.slice(0, 4);
+      const m  = +iso.slice(5, 7) - 1;
+      const d  = +iso.slice(8,10);
+      const hh = +iso.slice(11,13);
+      const mm = +iso.slice(14,16);
+      const ss = +iso.slice(17,19);
+
+      const dt = new Date(y, m, d, hh, mm, ss);
+      dt.setSeconds(dt.getSeconds() + deltaSeconds);
+
+      const pad = n => String(n).padStart(2, '0');
+      const offset = iso.slice(19); // preserves "+05:30" or "-04:00"
+
+      return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}` +
+            `T${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}${offset}`;
+    }
+    // Wire lagna navigation buttons.
+    // IMPORTANT:
+    // startsLocal and endsLocal are the exact transition instants returned by the
+    // Supabase astro-engine. Requesting the chart at the exact boundary can be
+    // ambiguous because the ascendant calculation may still classify that instant
+    // as belonging to the previous lagna due to floating-point precision and
+    // boundary semantics.
+    //
+    // To guarantee navigation lands INSIDE the desired lagna:
+    //
+    //   • Previous button:
+    //       Navigate to startsLocal - 1 second.
+    //       This places the requested time safely inside the previous lagna.
+    //
+    //   • Next button:
+    //       Navigate to endsLocal + 1 second.
+    //       This places the requested time safely inside the next lagna.
+    //
+    // The ±1 second adjustment is performed only by the navigation buttons.
+    // The transition timestamps themselves remain mathematically exact and are
+    // still displayed unchanged in the UI.
+    //
+    // NOTE:
+    // The adjustment must correctly handle midnight/day/month/year rollovers.
+    // Always offset the parsed timestamp, never manipulate the ISO string itself.
     if (prevBtn) prevBtn.addEventListener('click', () => {
       const iso = state.supabaseAstroData?.transitions?.ascendant?.startsLocal;
-      if (iso) navigateToLagnaTime(iso);
+      if (iso) navigateToLagnaTime(offsetIsoSeconds(iso, -1));
     });
+
     if (nextBtn) nextBtn.addEventListener('click', () => {
       const iso = state.supabaseAstroData?.transitions?.ascendant?.endsLocal;
-      if (iso) navigateToLagnaTime(iso);
+      if (iso) navigateToLagnaTime(offsetIsoSeconds(iso, +1));
     });
   }
   window._drawRasiChart = drawRasiChart; // expose to fetchSupabaseAstroData
@@ -3798,12 +3853,9 @@ async function fetchSupabaseAstroData() {
 
         let hh, mm, ss;
         if (timeInput && timeInput.value && state.userSetTime) {
-          [hh, mm] = timeInput.value.split(':').map(s => parseInt(s, 10));
-          // Use stored seconds from lagna navigation (avoids sub-minute stuck loop).
-          // Reset to 0 after use so a subsequent manual time-picker change starts
-          // fresh without inheriting stale seconds from a previous navigation.
-          ss = state.userSetSeconds ?? 0;
-          state.userSetSeconds = 0;
+          // input[step="1"] stores "HH:MM:SS"; plain "HH:MM" also handled.
+          const parts = timeInput.value.split(':').map(s => parseInt(s, 10));
+          [hh, mm, ss] = [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0];
         } else {
           // Live fallback to the SELECTED LOCATION's current wall-clock time.
           // Path: Current UTC (Date.now()) -> shift by the location's UTC
@@ -3823,9 +3875,7 @@ async function fetchSupabaseAstroData() {
 
         // Build a true UTC instant for "selDate at hh:mm:ss civil time at the
         // selected location's UTC offset". This bypasses the browser's own
-        // system timezone entirely (Date.UTC + explicit offset subtraction),
-        // fixing the bug where formatDateWithTzOffset's offset shift was
-        // previously being applied on top of an already browser-local time.
+        // system timezone entirely (Date.UTC + explicit offset subtraction).
         const dateWithSelectedTime = civilToUTCDate(
           selDate.getFullYear(), selDate.getMonth(), selDate.getDate(),
           hh, mm, ss, state.location.tzOffset
@@ -3849,6 +3899,9 @@ async function fetchSupabaseAstroData() {
 
     // Save to state — all downstream functions read from here
     state.supabaseAstroData = data;
+    console.log("REQUESTED:", document.getElementById("rasiChartTimeInput").value);
+    console.log("START:", data.transitions.ascendant.startsLocal);
+    console.log("END  :", data.transitions.ascendant.endsLocal);
 
     // Re-render the hora panel using cached params (no re-fetch of sunrise/sunset)
     // so the panchanga transition rows (Tithi/Nakshatra/Yoga/Karana ends) show up
