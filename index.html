@@ -4,7 +4,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vedic Planner — Electional Astrology/Muhurta</title>
+<title>Hora Vedic Planner — Electional Astrology/Muhurta</title>
 <style>
   :root {
     --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -263,16 +263,137 @@
     padding: 1.25rem;
     position: sticky;
     top: 72px;
+    /* position:sticky always forms its own stacking context, so anything
+       inside (e.g. .transit-dropdown / .yoga-dropdown, both z-index:150)
+       is trapped within it and can't out-rank a later sibling column.
+       Without this, the hora-panel column (also sticky, z-index:auto)
+       paints on top of the calendar card and clips dropdowns that spill
+       past the calendar column's width. */
+    z-index: 10;
   }
   .cal-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+  .cal-header-row1 {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    margin-bottom: 1.25rem;
     gap: 6px;
+  }
+  .cal-header-row2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   .cal-header-left  { display: flex; align-items: center; gap: 6px; }
   .cal-header-right { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+
+  /* TRANSIT BUTTON + DROPDOWN */
+  .transit-btn-wrap { position: relative; }
+  #transitBtn {
+    background: linear-gradient(135deg, #2a4a8a, #3a6ab0);
+    border: none;
+    border-radius: 6px;
+    color: #ddeeff;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(42,74,138,0.3);
+    transition: filter 0.15s;
+  }
+  #transitBtn:hover { filter: brightness(1.1); }
+  #transitBtn .transit-chevron {
+    font-size: 9px;
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+  #transitBtn.open .transit-chevron { transform: rotate(180deg); }
+
+  .transit-dropdown {
+    position: absolute;
+    top: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(300px, calc(100vw - 48px));
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 6px 24px var(--shadow);
+    z-index: 150;
+    display: none;
+    overflow: hidden;
+    max-height: 480px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  .transit-dropdown.open { display: block; }
+  .transit-dropdown-header {
+    background: linear-gradient(135deg, #2a4a8a, #3a6ab0);
+    padding: 10px 14px 8px;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #ddeeff;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .transit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.65rem;
+    font-family: var(--font-sans);
+  }
+  .transit-table thead tr { background: var(--bg2); }
+  .transit-table th {
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 600;
+    padding: 5px 10px 4px;
+    text-align: left;
+  }
+  .transit-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--bg3);
+    vertical-align: middle;
+  }
+  .transit-table tr:last-child td { border-bottom: none; }
+  .transit-table tr.transit-future td { opacity: 0.55; font-style: italic; }
+  .transit-table tr.transit-in-range { cursor: pointer; }
+  .transit-table tr.transit-in-range:hover td { background: var(--bg2); }
+  .transit-planet-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .transit-planet-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .transit-none {
+    padding: 14px;
+    font-size: 0.72rem;
+    color: var(--text3);
+    text-align: center;
+  }
   .cal-title {
     font-family: var(--font-sans);
     font-size: 1.20rem;
@@ -718,6 +839,8 @@
     display: flex;
     align-items: center;            /* Vertically centers both elements in the row */
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 10px;
   }
   .rasi-chart-title {
     font-family: var(--font-sans);
@@ -726,6 +849,34 @@
     letter-spacing: 0.07em;
     text-transform: uppercase;
     color: #5c4020;
+  }
+  .chart-style-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+  }
+  .chart-style-opt {
+    background: none;
+    border: none;
+    padding: 2px 1px;
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text3);
+    cursor: pointer;
+    transition: color 0.15s, font-weight 0.15s;
+  }
+  .chart-style-opt:hover { color: #5c4020; }
+  .chart-style-opt.active {
+    color: #1a1408;
+    font-weight: 700;
+  }
+  .chart-style-sep {
+    color: var(--border2);
+    font-size: 0.75rem;
   }
   .rasi-chart-time {
     font-size: 0.8rem;
@@ -1388,6 +1539,111 @@
   }
   #todayBtn:hover { background: rgba(212,160,23,0.30); color: #fff8e0; }
 
+  /* SCHEDULE (agenda) VIEW BUTTON — toggles hora panel into a Google-Calendar-style list */
+  #scheduleBtn {
+    background: rgba(212,160,23,0.15);
+    border: 1px solid rgba(212,160,23,0.45);
+    border-radius: 6px;
+    color: var(--gold-light);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #scheduleBtn:hover { background: rgba(212,160,23,0.30); color: #fff8e0; }
+  #scheduleBtn.active { background: var(--gold); color: #2a2210; border-color: var(--gold); }
+
+  /* SCHEDULE / AGENDA LIST — renders inside the hora panel in place of the hora table */
+  .schedule-view { padding: 4px 2px 24px; overflow-y: auto; height: 100%; }
+  .schedule-day-group { display: flex; border-bottom: 1px solid var(--border); }
+  .schedule-day-group:last-child { border-bottom: none; }
+  .schedule-day-label {
+    flex: 0 0 64px;
+    padding: 14px 8px 14px 4px;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .schedule-day-label:hover { opacity: 0.7; }
+  .schedule-day-num {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+  .schedule-day-num.today {
+    background: var(--gold);
+    color: #2a2210;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .schedule-day-sub {
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .schedule-day-sub.today { color: var(--gold-light); }
+  .schedule-day-events { flex: 1; padding: 4px 0; min-width: 0; }
+  .schedule-event-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 4px;
+    font-size: 0.85rem;
+  }
+  .schedule-event-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .schedule-event-time {
+    color: var(--text2);
+    white-space: nowrap;
+    min-width: 7.5em;
+  }
+  .schedule-event-title {
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .schedule-now-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 4px;
+  }
+  .schedule-now-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #e0402a;
+    flex-shrink: 0;
+  }
+  .schedule-now-line {
+    flex: 1;
+    height: 1px;
+    background: #e0402a;
+  }
+  .schedule-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 0.9rem;
+  }
+
   /* RESPONSIVE */
   @media (max-width: 1040px) {
     nav { padding: 0 0.85rem; gap: 0.6rem; height: auto; min-height: 52px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
@@ -1396,6 +1652,7 @@
     .nav-sep { display: none; }
     #locationInput { width: 130px; font-size: 13px; }
     #todayBtn { font-size: 12px; padding: 5px 10px; }
+    #scheduleBtn { font-size: 12px; padding: 5px 10px; }
     #faqBtn { font-size: 12px; padding: 5px 10px; }
     #settingsBtn { font-size: 12px; padding: 5px 10px; }
     .settings-panel {
@@ -1478,18 +1735,214 @@
   }
 
 
+  /* ── GCAL CONNECT BUTTON ─────────────────────────────────────────────────── */
+  .gcal-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(212,160,23,0.4);
+    border-radius: 6px;
+    color: rgba(240,216,136,0.85);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+  }
+  .gcal-btn:hover { background: rgba(212,160,23,0.2); color: #fff8e0; }
+  .gcal-btn svg { flex-shrink: 0; }
+
+  /* connected chip */
+  .gcal-chip {
+    display: none;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(212,160,23,0.3);
+    border-radius: 20px;
+    padding: 3px 12px 3px 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .gcal-chip:hover { background: rgba(212,160,23,0.15); }
+  .gcal-chip-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #4caf50;
+    flex-shrink: 0;
+  }
+  .gcal-chip-label {
+    font-size: 12.5px;
+    color: rgba(240,216,136,0.9);
+    white-space: nowrap;
+  }
+  .gcal-chip-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--indigo);
+    border: 1px solid rgba(212,160,23,0.4);
+    border-radius: 8px;
+    min-width: 170px;
+    display: none;
+    z-index: 300;
+    overflow: hidden;
+  }
+  .gcal-chip-menu.open { display: block; }
+  .gcal-chip-menu-item {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #d4c8a8;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.15s;
+  }
+  .gcal-chip-menu-item:last-child { border-bottom: none; }
+  .gcal-chip-menu-item:hover { background: rgba(212,160,23,0.12); color: var(--gold-light); }
+  .gcal-chip-menu-item.danger:hover { background: rgba(139,32,32,0.18); color: #f08080; }
+
+  /* popup: gcal toggle row */
+  .popup-gcal-row {
+    display: none;   /* shown only when connected */
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0 2px;
+    border-top: 1px solid var(--bg3);
+    margin-top: 4px;
+  }
+  .popup-gcal-row.visible { display: flex; }
+  .popup-gcal-label {
+    font-size: 12.5px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .popup-gcal-toggle {
+    position: relative;
+    width: 36px; height: 20px;
+    flex-shrink: 0;
+  }
+  .popup-gcal-toggle input { opacity: 0; width: 0; height: 0; }
+  .popup-gcal-slider {
+    position: absolute; inset: 0;
+    background: var(--border2);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .popup-gcal-slider::before {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    left: 3px; bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .popup-gcal-toggle input:checked + .popup-gcal-slider { background: #4caf50; }
+  .popup-gcal-toggle input:checked + .popup-gcal-slider::before { transform: translateX(16px); }
+
+  /* toast */
+  .hd-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--indigo);
+    border: 1px solid rgba(212,160,23,0.4);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 13.5px;
+    color: var(--gold-light);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    z-index: 900;
+    transition: transform 0.3s cubic-bezier(.22,.8,.36,1), opacity 0.3s;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .hd-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* migration banner */
+  .gcal-migrate-banner {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--indigo);
+    border: 1px solid rgba(212,160,23,0.5);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #d4c8a8;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    z-index: 901;
+    max-width: min(420px, calc(100vw - 32px));
+    line-height: 1.5;
+  }
+  .gcal-migrate-banner.show { display: block; }
+  .gcal-migrate-actions { display: flex; gap: 10px; margin-top: 12px; }
+  .gcal-migrate-btn {
+    flex: 1;
+    padding: 7px 0;
+    border-radius: 6px;
+    border: 1px solid rgba(212,160,23,0.4);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: background 0.2s;
+  }
+  .gcal-migrate-btn.primary { background: rgba(212,160,23,0.2); color: var(--gold-light); }
+  .gcal-migrate-btn.primary:hover { background: rgba(212,160,23,0.35); }
+  .gcal-migrate-btn.secondary { background: transparent; color: #a09080; }
+  .gcal-migrate-btn.secondary:hover { background: rgba(255,255,255,0.05); }
 </style>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 </head>
 <body>
 
+<!-- TOAST -->
+<div class="hd-toast" id="hdToast"></div>
+
+<!-- LOCAL→GCAL MIGRATION BANNER -->
+<div class="gcal-migrate-banner" id="gcalMigrateBanner">
+  <strong style="color:var(--gold-light);">You have local events</strong><br>
+  Add your <span id="gcalMigrateCount"></span> locally saved event(s) to Google Calendar so they appear on all your devices?
+  <div class="gcal-migrate-actions">
+    <button class="gcal-migrate-btn primary" id="gcalMigrateYes">Add to Google Calendar</button>
+    <button class="gcal-migrate-btn secondary" id="gcalMigrateNo">Keep local only</button>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="nav-brand" style="text-decoration:none; cursor:pointer;" title="Vedic Planner — Home">
+  <a href="index.html" class="nav-brand" style="text-decoration:none; cursor:pointer;" title="Hora Vedic Planner — Home">
     <div class="brandmark"><!--☽--></div>
-    <span>Vedic Planner</span>
+    <span>Hora Vedic Planner</span>
   </a>
 
   <button id="todayBtn">Today</button>
+
+  <button id="scheduleBtn" title="Agenda / schedule view">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2.5" width="12" height="11" rx="1.5"></rect>
+      <line x1="2" y1="6" x2="14" y2="6"></line>
+      <line x1="5" y1="8.5" x2="11" y2="8.5"></line>
+      <line x1="5" y1="11" x2="9.5" y2="11"></line>
+    </svg>
+    Schedule
+  </button>
 
   <div class="nav-sep"></div>
 
@@ -1501,7 +1954,7 @@
         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
         <line x1="12" y1="17" x2="12.01" y2="17"></line>
       </svg>-->
-      FAQs & Support
+      Support
     </button>
   </div>
 
@@ -1511,6 +1964,26 @@
     <input type="text" id="locationInput" placeholder="Search city…" autocomplete="off" spellcheck="false">
     <div class="loc-dropdown" id="locDropdown">
       <div class="loc-status">Type to search…</div>
+    </div>
+  </div>
+
+  <!-- Google Calendar Connect -->
+  <button class="gcal-btn" id="gcalConnectBtn" title="Sync events with Google Calendar">
+    <svg width="15" height="15" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+      <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+    </svg>
+    Connect Calendar
+  </button>
+
+  <!-- Connected chip (shown after auth) -->
+  <div class="gcal-chip" id="gcalChip">
+    <div class="gcal-chip-dot"></div>
+    <span class="gcal-chip-label">Calendar synced</span>
+    <div class="gcal-chip-menu" id="gcalChipMenu">
+      <div class="gcal-chip-menu-item danger" id="gcalDisconnectBtn">Disconnect</div>
     </div>
   </div>
 
@@ -1570,6 +2043,15 @@
           <div class="set-default-note" id="defaultSavedMsg" style="display:none; color:rgba(80,200,80,0.9); margin:0;">✓ Saved</div>
         </div>
       </div>
+      <!-- Full-width: Google Calendar sync filter -->
+      <div class="settings-col-full">
+        <div class="settings-label">Google Calendar Sync</div>
+        <label class="radio-option" style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="gcalAppOnlyToggle">
+          Only show events created by Hora Vedic Planner
+        </label>
+        <div class="time-type-note">When on (default), events you add directly in Google Calendar won't appear here. Turn off to sync everything on your calendar.</div>
+      </div>
     </div>
   </div>
 </nav>
@@ -1579,25 +2061,39 @@
   <!-- CALENDAR -->
   <div class="calendar-card">
     <div class="cal-header">
-      <!-- Left: Auspicious Yogas button -->
-      <div class="cal-header-left">
+      <!-- Row 1: Month title + nav arrows -->
+      <div class="cal-header-row1">
+        <div></div><!-- spacer -->
+        <div class="cal-title" id="calTitle"></div>
+        <div class="cal-header-right">
+          <button class="cal-nav-btn" id="prevMonth">&#8249;</button>
+          <button class="cal-nav-btn" id="nextMonth">&#8250;</button>
+        </div>
+      </div>
+      <!-- Row 2: Auspicious Yogas + Grahā Gati buttons -->
+      <div class="cal-header-row2">
+        <!-- Auspicious Yogas -->
         <div class="yoga-btn-wrap">
           <button id="yogaBtn">✦ Auspicious Yogas <span class="yoga-chevron">▾</span></button>
           <div class="yoga-dropdown" id="yogaDropdown">
             <div class="yoga-dropdown-header">
               <span class="yoga-month-label" id="yogaMonthLabel"></span>
-              <span>Auspicious Yogas</span>              
+              <span>Auspicious Yogas</span>
             </div>
             <div id="yogaList"><div class="yoga-computing">Loading…</div></div>
           </div>
         </div>
-      </div>
-      <!-- Centre: Month Year title -->
-      <div class="cal-title" id="calTitle"></div>
-      <!-- Right: prev / next nav -->
-      <div class="cal-header-right">
-        <button class="cal-nav-btn" id="prevMonth">&#8249;</button>
-        <button class="cal-nav-btn" id="nextMonth">&#8250;</button>
+        <!-- Grahā Gati — Planetary Transits -->
+        <div class="transit-btn-wrap">
+          <button id="transitBtn">♃ Transits <span class="transit-chevron">▾</span></button>
+          <div class="transit-dropdown" id="transitDropdown">
+            <div class="transit-dropdown-header">
+              <span id="transitMonthLabel"></span>
+              <span>Planetary Transits</span>
+            </div>
+            <div id="transitList"><div class="transit-none">Loading…</div></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="cal-grid" id="calGrid"></div>
@@ -1621,9 +2117,14 @@
   <!-- SIDEREAL CHART PANEL -->
   <div class="rasi-chart-wrap" id="rasiChartWrap">
     <div class="rasi-chart-header">
-      <div class="rasi-chart-title">
+      <!--<div class="rasi-chart-title">
         <span>Sidereal Horoscope</span>
-      </div>  
+      </div>-->
+      <div class="chart-style-toggle" id="chartStyleToggle">
+        <button type="button" class="chart-style-opt" data-style="north">North</button>
+        <span class="chart-style-sep">|</span>
+        <button type="button" class="chart-style-opt" data-style="south">South</button>
+      </div>
         <input type="time" id="rasiChartTimeInput" class="rasi-chart-time-input" step="1">
     </div>
     <div class="rasi-svg-wrap" id="rasiSvgWrap">
@@ -1647,19 +2148,24 @@
     <!-- Quick FAQs -->
     <div style="display: flex; flex-direction: column; gap: 12px;">
       <div style="font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold2); font-weight: 600; margin-bottom: 4px;">Quick FAQs</div>
-      
+
+      <details style="background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 10px; cursor: pointer;">
+        <summary style="font-weight: 600; font-size: 0.9rem; color: var(--text);">What happens when I connect Google Calendar?</summary>
+        <p style="font-size: 0.85rem; color: var(--text2); margin-top: 6px; line-height: 1.4;">We do not store any of your calendar or Google account data with us. When you connect the Google Calendar, this web app syncs with the Calendar directly. In the Settings, you can choose if you wish to display only the events created here or all Google Calendar events. You can edit or delete an event ONLY from Google Calendar not from Hora Vedic Planner.</p>
+      </details>
+
       <details style="background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 10px; cursor: pointer;">
         <summary style="font-weight: 600; font-size: 0.9rem; color: var(--text);">What is the difference between LST and LMT?</summary>
         <p style="font-size: 0.85rem; color: var(--text2); margin-top: 6px; line-height: 1.4;">LST (Local Standard Time) follows your regional clock. LMT (Local Mean Time) adjusts explicitly for your precise geographic longitude offset from the timezone meridian, which alters boundary timings.</p>
       </details>
 
       <details style="background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 10px; cursor: pointer;">
-        <summary style="font-weight: 600; font-size: 0.9rem; color: var(--text);">How does Vedic Planner data differ from data on other softwares?</summary>
-        <p style="font-size: 0.85rem; color: var(--text2); margin-top: 6px; line-height: 1.4;">Vedic Planner is a free to use tool and is being designed to remain free forever. Paid softwares use Swiss Ephemeris which requires licensing fees but Vedic Planner uses open source astronomical libraries for our calculations which is accurate within sub-arcminute of Swiss Ephemeris for 100 year span.</p>
+        <summary style="font-weight: 600; font-size: 0.9rem; color: var(--text);">How does Hora Vedic Planner data differ from data on other softwares?</summary>
+        <p style="font-size: 0.85rem; color: var(--text2); margin-top: 6px; line-height: 1.4;">Hora Vedic Planner is a free to use tool and is being designed to remain free forever. Paid softwares use Swiss Ephemeris which requires licensing fees but Hora Vedic Planner uses open source astronomical libraries for our calculations which is accurate within sub-arcminute of Swiss Ephemeris for 100 year span.</p>
       </details>
 
       <details style="background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 10px; cursor: pointer;">
-        <summary style="font-weight: 600; font-size: 0.9rem; color: var(--text);">What is the definition of sunrise and sunset used in Vedic Planner?</summary>
+        <summary style="font-weight: 600; font-size: 0.9rem; color: var(--text);">What is the definition of sunrise and sunset used in Hora Vedic Planner?</summary>
         <p style="font-size: 0.85rem; color: var(--text2); margin-top: 6px; line-height: 1.4;">For calculation purposes, sunrise and sunset tracks the moment the upper rim of the sun is tangent to an unobstructed horizon at sea level.</p>
       </details>        
      
@@ -1711,8 +2217,26 @@
     </div>
   </div>
   <div class="event-popup-footer">
-    <button class="popup-btn popup-btn-cancel" id="popupCancel">Cancel</button>
-    <button class="popup-btn popup-btn-save"   id="popupSave">Save event</button>
+    <!-- GCal sync toggle — only visible when connected -->
+    <div class="popup-gcal-row" id="popupGcalRow">
+      <span class="popup-gcal-label">
+        <svg width="13" height="13" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+          <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Add to Google Calendar
+      </span>
+      <label class="popup-gcal-toggle">
+        <input type="checkbox" id="popupGcalToggle" checked>
+        <span class="popup-gcal-slider"></span>
+      </label>
+    </div>
+    <div style="display:flex; gap:8px; width:100%;">
+      <button class="popup-btn popup-btn-cancel" id="popupCancel">Cancel</button>
+      <button class="popup-btn popup-btn-save"   id="popupSave">Save event</button>
+    </div>
   </div>
 </div>
 
@@ -1734,9 +2258,24 @@ function loadDefaultAyanamsa() {
     return saved ? saved : DEFAULT_AYANAMSA;
   } catch { return DEFAULT_AYANAMSA; }
 }
+function loadChartStyle() {
+  try {
+    const saved = localStorage.getItem('horadarpan_chart_style');
+    return (saved === 'north' || saved === 'south') ? saved : 'south';
+  } catch { return 'south'; }
+}
+function loadGcalAppOnlyFilter() {
+  // Default ON: only show events this app itself created in Google Calendar.
+  // Turning it off in Settings reveals every event on the user's calendar.
+  try {
+    const saved = localStorage.getItem('horadarpan_gcal_app_only');
+    return saved === null ? true : saved === 'true';
+  } catch { return true; }
+}
 const state = {
   location: loadDefaultLocation(),
   ayanamsa: loadDefaultAyanamsa(),
+  chartStyle: loadChartStyle(), // 'south' | 'north' — sidereal chart rendering style
   horaSystem: 'mahakala-muhurta',
   timeType: 'lst',
   viewYear: 0,   // set just below, once state.location is known
@@ -1749,7 +2288,10 @@ const state = {
                        // live "now at location" value or honor a fixed time.
   panchangaCache: {},          // keyed by "YYYY-MM-DD" → panchanga data from month-panchanga-engine
   monthPanchangaFetching: new Set(), // tracks "YYYY-MM" keys currently in-flight
-  events: loadStoredEvents()
+  monthTransits: [],           // PlanetTransit[] from latest fetchMonthPanchanga (_transits field)
+  events: loadStoredEvents(),
+  viewMode: 'hora',  // 'hora' | 'schedule' — which content the middle panel shows
+  gcalAppOnlyFilter: loadGcalAppOnlyFilter() // true = only show GCal events this app created
 };
 {
   const initLocNow = getNowAtLocation(state.location.tzOffset);
@@ -1766,6 +2308,385 @@ function saveEvents() {
   try { localStorage.setItem('horadarpan_events', JSON.stringify(state.events)); }
   catch {}
 }
+
+// ─── GOOGLE CALENDAR INTEGRATION (GIS implicit token flow) ───────────────────
+// Architecture: access token in memory only, GIS handles silent re-auth,
+// no token ever written to localStorage, no backend involved.
+
+const GCAL_CLIENT_ID = '835516411712-fmvnjehg251rbo763prm4f6ek7cq9ia8.apps.googleusercontent.com'; // ← replace
+const GCAL_SCOPE     = 'https://www.googleapis.com/auth/calendar.events';
+const GCAL_SOURCE    = 'vedicplanner'; // extendedProperties tag on all our events
+
+let _gcalToken     = null;  // access token — memory only
+let _gcalTokenExp  = 0;     // expiry epoch ms
+let _tokenClient   = null;  // GIS TokenClient instance
+let _gcalConnected = false;
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+let _toastTimer = null;
+function showToast(msg, ms = 3200) {
+  const el = document.getElementById('hdToast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// ── Token helpers ──────────────────────────────────────────────────────────
+function _gcalTokenValid() {
+  return _gcalToken && Date.now() < _gcalTokenExp - 60_000; // 60s buffer
+}
+
+// Request a token. prompt='' → silent (no popup); prompt='consent' → interactive.
+// Returns a Promise that resolves when the token callback fires.
+function _requestToken(prompt = '') {
+  return new Promise((resolve, reject) => {
+    if (!_tokenClient) { reject(new Error('GIS not loaded')); return; }
+    _tokenClient.callback = (resp) => {
+      if (resp.error) { reject(new Error(resp.error)); return; }
+      _gcalToken    = resp.access_token;
+      _gcalTokenExp = Date.now() + resp.expires_in * 1000;
+      resolve();
+    };
+    _tokenClient.requestAccessToken({ prompt });
+  });
+}
+
+// Ensure we have a valid token; silently refresh if near expiry.
+// Falls back to interactive if silent fails (user not signed into Google).
+async function _ensureToken() {
+  if (_gcalTokenValid()) return; // still good
+  try {
+    await _requestToken('');     // silent attempt
+  } catch {
+    // Silent failed — need interactive consent
+    await _requestToken('consent');
+  }
+}
+
+// ── GIS initialisation (called once gsi/client script is ready) ────────────
+function _initGIS() {
+  if (!window.google?.accounts?.oauth2) return;
+  _tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GCAL_CLIENT_ID,
+    scope:     GCAL_SCOPE,
+    // callback set dynamically in _requestToken
+  });
+}
+
+// Retry _initGIS up to ~3 s in case the async GIS script hasn't parsed yet
+(function _waitForGIS(attempts) {
+  if (window.google?.accounts?.oauth2) {
+    _initGIS();
+    _attemptSilentReconnect();
+    return;
+  }
+  if (attempts > 0) setTimeout(() => _waitForGIS(attempts - 1), 300);
+})(10);
+
+// ── Silent reconnect on page load ──────────────────────────────────────────
+// After a refresh, the in-memory token is gone (by design — nothing is
+// persisted). If the user's Google session is still active and they've
+// already granted consent, prompt='' resolves with a token and NO popup —
+// so the Calendar reconnects transparently. If it fails (session expired or
+// consent revoked), we simply stay disconnected until they click "Connect"
+// and go through the interactive flow. Nothing is stored either way.
+async function _attemptSilentReconnect() {
+  try {
+    await _requestToken(''); // silent only — never fall back to interactive here
+    _gcalConnected = true;
+    _updateGcalUI();
+    _refreshGcalForCurrentView();
+  } catch {
+    // Silent reconnect failed — leave user in the disconnected state;
+    // no popup, no error toast, since this runs automatically on every load.
+  }
+}
+
+// ── Connect / Disconnect ───────────────────────────────────────────────────
+async function gcalConnect() {
+  try {
+    await _requestToken('consent'); // always interactive on first connect
+    _gcalConnected = true;
+    _updateGcalUI();
+    showToast('✓ Google Calendar connected');
+    // Offer migration of existing local events
+    _offerMigration();
+    // Load Google Calendar events (all of them, not just app-created ones)
+    // for whichever view is currently visible.
+    _refreshGcalForCurrentView();
+  } catch (err) {
+    showToast('Could not connect to Google Calendar');
+    console.warn('GCal connect error:', err);
+  }
+}
+
+function gcalDisconnect() {
+  if (_gcalToken) {
+    google.accounts.oauth2.revoke(_gcalToken, () => {});
+  }
+  _gcalToken     = null;
+  _gcalTokenExp  = 0;
+  _gcalConnected = false;
+  // Remove gcal events from state (keep local ones)
+  state.events = state.events.filter(ev => !ev.gcalId);
+  saveEvents();
+  _updateGcalUI();
+  loadHoras();
+  showToast('Google Calendar disconnected');
+}
+
+function _updateGcalUI() {
+  const connectBtn = document.getElementById('gcalConnectBtn');
+  const chip       = document.getElementById('gcalChip');
+  const popupRow   = document.getElementById('popupGcalRow');
+  if (connectBtn) connectBtn.style.display = _gcalConnected ? 'none' : 'flex';
+  if (chip)       chip.style.display       = _gcalConnected ? 'flex' : 'none';
+  if (popupRow)   popupRow.classList.toggle('visible', _gcalConnected);
+}
+
+// ── Google Calendar API calls ──────────────────────────────────────────────
+
+// Convert app's dateKey + startSec/endSec to RFC3339 datetimes
+function _secsToRFC3339(dKey, sec, tzOffset) {
+  const totalMin = Math.floor(sec / 60);
+  const h   = Math.floor(totalMin / 60) % 24;
+  const min = totalMin % 60;
+  const sign = tzOffset >= 0 ? '+' : '-';
+  const absOff = Math.abs(tzOffset);
+  const oh = String(Math.floor(absOff)).padStart(2, '0');
+  const om = String(Math.round((absOff % 1) * 60)).padStart(2, '0');
+  const pad = n => String(n).padStart(2, '0');
+  return `${dKey}T${pad(h)}:${pad(min)}:00${sign}${oh}:${om}`;
+}
+
+// Map app colour hex → Google Calendar colorId (1–11)
+function _colorIdFromHex(hex) {
+  const map = {
+    '#c8860a': '5',  // banana
+    '#4a6080': '7',  // peacock
+    '#8b2020': '11', // tomato
+    '#1a5c1a': '2',  // sage
+    '#6b4e9e': '9',  // grape
+    '#2a5a5a': '8',  // graphite
+    '#3a3a5c': '9',  // grape (closest)
+  };
+  return map[(hex || '').toLowerCase()] ?? '1';
+}
+
+async function _gcalCreateEvent(ev) {
+  await _ensureToken();
+  const tz  = state.location.tz || 'Asia/Kolkata';
+  const off = state.location.tzOffset ?? 5.5;
+  const body = {
+    summary:     ev.title,
+    description: ev.description || '',
+    colorId:     _colorIdFromHex(ev.color),
+    start: { dateTime: _secsToRFC3339(ev.dateKey, ev.startSec, off), timeZone: tz },
+    end:   { dateTime: _secsToRFC3339(ev.dateKey, ev.endSec || ev.startSec + 3600, off), timeZone: tz },
+    extendedProperties: { private: { source: GCAL_SOURCE, localId: ev.id } },
+  };
+  const res = await fetch(
+    'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+    {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${_gcalToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.id; // Google Calendar event ID
+}
+
+// Shared fetch: pulls ALL events (not just ones this app created) from
+// Google Calendar in a given RFC3339 time range, and normalizes them.
+// Previously this was filtered with privateExtendedProperty=source=vedicplanner,
+// which meant events added directly in Google Calendar (with no such tag)
+// were silently excluded — that was the read bug. Now we fetch everything
+// and dedupe against the app's own already-tracked local events instead.
+async function _fetchGcalEventsInRange(timeMinISO, timeMaxISO) {
+  let url = `https://www.googleapis.com/calendar/v3/calendars/primary/events`
+    + `?timeMin=${encodeURIComponent(timeMinISO)}&timeMax=${encodeURIComponent(timeMaxISO)}`
+    + `&singleEvents=true&orderBy=startTime`;
+  // Default: only pull events this app itself created (tagged with our
+  // source property). Off in Settings → pull every event on the calendar.
+  if (state.gcalAppOnlyFilter) {
+    url += `&privateExtendedProperty=${encodeURIComponent(`source=${GCAL_SOURCE}`)}`;
+  }
+  const res = await fetch(url, { headers: { 'Authorization': `Bearer ${_gcalToken}` } });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.items || []).map(item => {
+    const startDT = item.start?.dateTime || item.start?.date || '';
+    const endDT   = item.end?.dateTime   || item.end?.date   || '';
+    const toSec = dt => {
+      if (!dt) return 0;
+      const t = dt.match(/T(\d{2}):(\d{2})/);
+      return t ? parseInt(t[1]) * 3600 + parseInt(t[2]) * 60 : 0;
+    };
+    // Each item's own date (not the query range) — needed for month-wide
+    // fetches where results span many different days.
+    const dk = startDT.slice(0, 10);
+    return {
+      id:          item.extendedProperties?.private?.localId || item.id,
+      gcalId:      item.id,
+      dateKey:     dk,
+      startSec:    toSec(startDT),
+      endSec:      toSec(endDT),
+      title:       item.summary || '(no title)',
+      description: item.description || '',
+      color:       '#4a6080', // default; GCal colorId→hex mapping could be added
+      fromGcal:    true,
+      _localId:    item.extendedProperties?.private?.localId || null,
+    };
+  });
+}
+
+// Merge freshly-fetched GCal items into state.events for a set of dateKeys,
+// skipping any item that's really just an event the app itself already
+// created and is already tracking locally (matched via the localId tag we
+// stamp on write) so it doesn't get double-listed.
+function _mergeGcalEvents(items, dateKeysInRange) {
+  const localIds = new Set(state.events.filter(e => !e.fromGcal).map(e => e.id));
+  const deduped = items.filter(it => !(it._localId && localIds.has(it._localId)));
+  state.events = state.events.filter(ev => !(dateKeysInRange.has(ev.dateKey) && ev.fromGcal));
+  state.events.push(...deduped.map(({ _localId, ...ev }) => ev));
+}
+
+async function _loadGcalEventsForDate(date) {
+  if (!_gcalConnected || !_gcalTokenValid()) return;
+  const dk  = dateKey(date);
+  const off = state.location.tzOffset ?? 5.5;
+  const sign = off >= 0 ? '+' : '-';
+  const absOff = Math.abs(off);
+  const oh = String(Math.floor(absOff)).padStart(2,'0');
+  const om = String(Math.round((absOff % 1) * 60)).padStart(2,'0');
+  const tzStr = `${sign}${oh}:${om}`;
+  const timeMin = `${dk}T00:00:00${tzStr}`;
+  const timeMax = `${dk}T23:59:59${tzStr}`;
+  try {
+    const items = await _fetchGcalEventsInRange(timeMin, timeMax);
+    _mergeGcalEvents(items, new Set([dk]));
+    loadHoras();
+  } catch (err) {
+    console.warn('GCal load error:', err);
+  }
+}
+
+// Month-wide fetch — used by the Schedule (agenda) view, which shows every
+// event across the visible month rather than just the selected day.
+async function _loadGcalEventsForMonth(year, month) {
+  if (!_gcalConnected || !_gcalTokenValid()) return;
+  const off = state.location.tzOffset ?? 5.5;
+  const sign = off >= 0 ? '+' : '-';
+  const absOff = Math.abs(off);
+  const oh = String(Math.floor(absOff)).padStart(2,'0');
+  const om = String(Math.round((absOff % 1) * 60)).padStart(2,'0');
+  const tzStr = `${sign}${oh}:${om}`;
+  const firstDay = `${year}-${String(month + 1).padStart(2,'0')}-01`;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const lastDay = `${year}-${String(month + 1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
+  const timeMin = `${firstDay}T00:00:00${tzStr}`;
+  const timeMax = `${lastDay}T23:59:59${tzStr}`;
+  const monthPrefix = `${year}-${String(month + 1).padStart(2,'0')}-`;
+  try {
+    const items = await _fetchGcalEventsInRange(timeMin, timeMax);
+    const dateKeysInRange = new Set(
+      Array.from({ length: daysInMonth }, (_, i) => `${monthPrefix}${String(i + 1).padStart(2,'0')}`)
+    );
+    _mergeGcalEvents(items, dateKeysInRange);
+    if (state.viewMode === 'schedule') renderScheduleView();
+  } catch (err) {
+    console.warn('GCal month load error:', err);
+  }
+}
+
+// ── One-time migration of local events → GCal ─────────────────────────────
+function _offerMigration() {
+  const localEvs = state.events.filter(ev => !ev.fromGcal && !ev.gcalId);
+  if (!localEvs.length) return;
+  const banner = document.getElementById('gcalMigrateBanner');
+  document.getElementById('gcalMigrateCount').textContent = localEvs.length;
+  banner.classList.add('show');
+}
+
+async function _migrateLocalEvents() {
+  const banner  = document.getElementById('gcalMigrateBanner');
+  banner.classList.remove('show');
+  const localEvs = state.events.filter(ev => !ev.fromGcal && !ev.gcalId);
+  if (!localEvs.length) return;
+  showToast(`Uploading ${localEvs.length} event(s) to Google Calendar…`, 8000);
+  let ok = 0;
+  for (const ev of localEvs) {
+    try {
+      const gcalId = await _gcalCreateEvent(ev);
+      ev.gcalId = gcalId;
+      ok++;
+      await new Promise(r => setTimeout(r, 120)); // respect rate limits
+    } catch (err) {
+      console.warn('Migration failed for event:', ev.title, err);
+    }
+  }
+  saveEvents();
+  showToast(`✓ ${ok} event(s) added to Google Calendar`);
+}
+
+// ── Keep in sync with events added/edited directly in Google Calendar ──────
+// The app only ever fetched on connect/date-change, so edits made straight
+// in Google Calendar (not through this app) never appeared until the next
+// navigation. Poll while connected, and also refresh when the tab regains
+// focus (covers "switched to Calendar, added an event, switched back").
+function _refreshGcalForCurrentView() {
+  if (!_gcalConnected) return;
+  if (state.viewMode === 'schedule') {
+    _loadGcalEventsForMonth(state.viewYear, state.viewMonth);
+  } else if (state.selectedDate) {
+    _loadGcalEventsForDate(state.selectedDate);
+  }
+}
+
+let _gcalPollTimer = null;
+function _startGcalPolling() {
+  clearInterval(_gcalPollTimer);
+  _gcalPollTimer = setInterval(_refreshGcalForCurrentView, 60_000); // 60s — light enough to respect API quota, frequent enough to feel live
+}
+_startGcalPolling();
+
+window.addEventListener('focus', _refreshGcalForCurrentView);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') _refreshGcalForCurrentView();
+});
+
+// ── Nav button wiring ──────────────────────────────────────────────────────
+document.getElementById('gcalConnectBtn').addEventListener('click', gcalConnect);
+
+document.getElementById('gcalChip').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('gcalChipMenu').classList.toggle('open');
+});
+
+document.getElementById('gcalDisconnectBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('gcalChipMenu').classList.remove('open');
+  gcalDisconnect();
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#gcalChip')) {
+    document.getElementById('gcalChipMenu')?.classList.remove('open');
+  }
+});
+
+document.getElementById('gcalMigrateYes').addEventListener('click', _migrateLocalEvents);
+document.getElementById('gcalMigrateNo').addEventListener('click', () => {
+  document.getElementById('gcalMigrateBanner').classList.remove('show');
+});
+
 // dateKey: 'YYYY-MM-DD' string for a JS Date
 function dateKey(date) {
   const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
@@ -2297,6 +3218,7 @@ function renderCalendar() {
       renderCalendar();
       loadHoras();
       fetchSupabaseAstroData();
+      if (_gcalConnected) _loadGcalEventsForDate(state.selectedDate);
     });
   });
 }
@@ -2337,9 +3259,145 @@ function renderDay(date, otherMonth) {
   </div>`;
 }
 
+// ─── SCHEDULE (AGENDA) VIEW ─────────────────────────────────────────────────
+// A Google-Calendar-style flat list of upcoming events, grouped by date,
+// shown in the hora panel in place of the hora table when toggled on.
+
+function _scheduleTimeFmt(sec) {
+  let s = ((sec % 86400) + 86400) % 86400;
+  let h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const ampm = h >= 12 ? 'pm' : 'am';
+  h = h % 12; if (h === 0) h = 12;
+  return m === 0 ? `${h}${ampm}` : `${h}:${String(m).padStart(2, '0')}${ampm}`;
+}
+
+function toggleScheduleView() {
+  state.viewMode = state.viewMode === 'schedule' ? 'hora' : 'schedule';
+  const btn = document.getElementById('scheduleBtn');
+  if (btn) btn.classList.toggle('active', state.viewMode === 'schedule');
+  if (state.viewMode === 'schedule') {
+    renderScheduleView();
+    if (_gcalConnected) _loadGcalEventsForMonth(state.viewYear, state.viewMonth);
+  } else {
+    loadHoras();
+  }
+}
+
+function renderScheduleView() {
+  const panel = document.getElementById('horaPanel');
+  if (!panel) return;
+
+  const today = new Date();
+  const todayKey = dateKey(today);
+
+  // Show the whole month currently in view on the calendar (not just future
+  // events) so past days remain scrollable above — today's group is what we
+  // scroll to on render, rather than being the cutoff for what's shown.
+  const viewY = state.viewYear;
+  const viewM = state.viewMonth; // 0-indexed
+  const monthPrefix = `${viewY}-${String(viewM + 1).padStart(2, '0')}-`;
+
+  const byDate = {};
+  for (const ev of state.events) {
+    if (!ev.dateKey.startsWith(monthPrefix)) continue;
+    (byDate[ev.dateKey] = byDate[ev.dateKey] || []).push(ev);
+  }
+  const dateKeys = Object.keys(byDate).sort();
+  for (const k of dateKeys) byDate[k].sort((a, b) => a.startSec - b.startSec);
+
+  if (!dateKeys.length) {
+    panel.innerHTML = `<div class="schedule-view"><div class="schedule-empty">No events this month. Add one from the calendar to see it here.</div></div>`;
+    return;
+  }
+
+  const nowSec = today.getHours() * 3600 + today.getMinutes() * 60 + today.getSeconds();
+  const monthShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dowShort = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  let html = '<div class="schedule-view" id="scheduleScroll">';
+  for (const k of dateKeys) {
+    const [y, mo, d] = k.split('-').map(Number);
+    const dObj = new Date(y, mo - 1, d);
+    const isToday = k === todayKey;
+    const evs = byDate[k];
+
+    // Build the event rows, splicing in a "now" marker at the right position
+    // within today's group.
+    let rowsHtml = '';
+    let nowInserted = !isToday;
+    for (const ev of evs) {
+      if (isToday && !nowInserted && ev.startSec > nowSec) {
+        rowsHtml += `<div class="schedule-now-row"><div class="schedule-now-dot"></div><div class="schedule-now-line"></div></div>`;
+        nowInserted = true;
+      }
+      const timeStr = ev.endSec
+        ? `${_scheduleTimeFmt(ev.startSec)} – ${_scheduleTimeFmt(ev.endSec)}`
+        : _scheduleTimeFmt(ev.startSec);
+      rowsHtml += `
+        <div class="schedule-event-row">
+          <div class="schedule-event-dot" style="background:${ev.color || '#4a6080'}"></div>
+          <div class="schedule-event-time">${timeStr}</div>
+          <div class="schedule-event-title" title="${(ev.title || '').replace(/"/g, '&quot;')}">${ev.title || '(untitled)'}</div>
+        </div>`;
+    }
+    if (isToday && !nowInserted) {
+      rowsHtml += `<div class="schedule-now-row"><div class="schedule-now-dot"></div><div class="schedule-now-line"></div></div>`;
+    }
+
+    html += `
+      <div class="schedule-day-group"${isToday ? ' id="scheduleTodayGroup"' : ''} data-year="${y}" data-month="${mo - 1}" data-day="${d}">
+        <div class="schedule-day-label">
+          <div class="schedule-day-num${isToday ? ' today' : ''}">${d}</div>
+          <div class="schedule-day-sub${isToday ? ' today' : ''}">${monthShort[mo - 1]}, ${dowShort[dObj.getDay()]}</div>
+        </div>
+        <div class="schedule-day-events">${rowsHtml}</div>
+      </div>`;
+  }
+  html += '</div>';
+  panel.innerHTML = html;
+
+  // Clicking a date's left-hand label jumps back to the hora view for that
+  // date — same effect as clicking the day on the calendar: updates the
+  // selected date, re-renders the calendar highlight, reloads horas (which
+  // also redraws the rasi chart for "now" at that date), and refreshes any
+  // GCal events for the day.
+  panel.querySelectorAll('.schedule-day-label').forEach(el => {
+    el.addEventListener('click', () => {
+      const group = el.closest('.schedule-day-group');
+      const y = parseInt(group.dataset.year, 10);
+      const m = parseInt(group.dataset.month, 10);
+      const d = parseInt(group.dataset.day, 10);
+      state.selectedDate = new Date(y, m, d);
+      state.viewYear = y;
+      state.viewMonth = m;
+      state.viewMode = 'hora';
+      const btn = document.getElementById('scheduleBtn');
+      if (btn) btn.classList.remove('active');
+      renderCalendar();
+      loadHoras();
+      fetchSupabaseAstroData();
+      if (_gcalConnected) _loadGcalEventsForDate(state.selectedDate);
+    });
+  });
+
+  // Scroll so today's group sits at the top of the visible list, leaving
+  // earlier-in-the-month days scrollable above it.
+  const scrollEl = document.getElementById('scheduleScroll');
+  const todayEl = document.getElementById('scheduleTodayGroup');
+  if (scrollEl && todayEl) {
+    scrollEl.scrollTop = todayEl.offsetTop - scrollEl.offsetTop;
+  }
+}
+
 // ─── LOAD & RENDER HORAS ─────────────────────────────────────────────────────
 async function loadHoras() {
   if (!state.selectedDate) return;
+  // If the user has the Schedule (agenda) view open, keep it in sync instead
+  // of overwriting it with the hora table — every existing caller of
+  // loadHoras() (calendar nav, Today button, GCal sync, etc.) still "just
+  // works" and refreshes whichever view is currently showing.
+  if (state.viewMode === 'schedule') { renderScheduleView(); return; }
   const panel = document.getElementById('horaPanel');
   panel.innerHTML = `<div class="state-overlay"><div class="spinner"></div><span>Calculating horas…</span></div>`;
 
@@ -2683,6 +3741,18 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
     } else if (ev.type === 'scheduled') {
       const e = ev.data;
       const timeStr = secToTime(e.startSec, lmtAdj) + (e.endSec ? ' – ' + secToTime(e.endSec, lmtAdj) : '');
+      // GCal-sourced events: show a calendar badge instead of a delete button
+      // (deletion is intentionally not supported from this app)
+      const actionHtml = e.fromGcal
+        ? `<span title="From Google Calendar" style="font-size:10px; color:rgba(212,160,23,0.5); flex-shrink:0; padding-right:4px;">
+             <svg width="12" height="12" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+               <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+               <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+               <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+               <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+             </svg>
+           </span>`
+        : `<button class="sched-event-delete" data-event-id="${e.id}" title="Delete">✕</button>`;
       rows += `<tr class="scheduled-event-row" data-event-id="${e.id}">
         <td colspan="3">
           <div class="sched-event-block" data-event-id="${e.id}">
@@ -2692,7 +3762,7 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
               <div class="sched-event-meta">${timeStr}</div>
               ${e.description ? `<div class="sched-event-desc">${e.description}</div>` : ''}
             </div>
-            <button class="sched-event-delete" data-event-id="${e.id}" title="Delete">✕</button>
+            ${actionHtml}
           </div>
         </td>
       </tr>`;
@@ -2861,7 +3931,9 @@ function renderHoras(horas, specials, sunriseSec, sunsetSec, lmtAdj, date) {
     const lagnaEndHHMM   = lagnaEndISO   ? lagnaEndISO.slice(11, 16)   : null;
 
     const chartHtml = (grahas && lagna !== null)
-      ? renderSouthIndianChart(lagna, grahas, chartSize)
+      ? (state.chartStyle === 'north'
+          ? renderNorthIndianChart(lagna, grahas, chartSize)
+          : renderSouthIndianChart(lagna, grahas, chartSize))
       : `<div style="color:var(--text3);font-size:12px;padding:10px 0;font-style:italic;">
            Select a date to load chart from Supabase…
          </div>`;
@@ -3160,6 +4232,130 @@ function renderSouthIndianChart(lagna, grahas, size) {
   return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${cells}</svg>`;
 }
 
+// North Indian style: fixed house positions (house 1/lagna always at top),
+// rasi numbers rotate into place based on the lagna rasi.
+//
+// Geometry: outer square + inscribed diamond (side-midpoints, drawn as 4
+// edges v1..v4) + the square's TWO FULL corner-to-corner diagonals (d1, d2).
+// Each diagonal is parallel to two diamond edges and crosses the other two
+// at their midpoints -- call those crossing points P1 (on edge ML-MT), P2
+// (on MT-MR), P3 (on MR-MB), P4 (on MB-ML). This is what actually divides
+// the square into the 12 house regions:
+//   - 4 "kite" houses (1, 4, 7, 10) -- each bounded by an outer diamond
+//     vertex (MT/ML/MB/MR), the two adjacent P-points, and the center C.
+//   - 8 corner triangles (2,3 / 5,6 / 8,9 / 11,12) -- each a square-corner
+//     triangle split in two by its diagonal, using the relevant P-point
+//     (not C) as the shared inner vertex.
+// House order runs counter-clockwise from house 1 (top): 2/3 upper-left,
+// 4 left, 5/6 lower-left, 7 bottom, 8/9 lower-right, 10 right, 11/12
+// upper-right -- matching conventional North Indian chart layout.
+function renderNorthIndianChart(lagna, grahas, size) {
+  const lagnaRasi = Math.floor(lagna / 30);
+  const S = size || 280;
+
+  const TL = [0, 0], TR = [S, 0], BR = [S, S], BL = [0, S];
+  const MT = [S / 2, 0], MR = [S, S / 2], MB = [S / 2, S], ML = [0, S / 2];
+  const C  = [S / 2, S / 2];
+  // Diagonal/diamond-edge crossing points
+  const P1 = [S / 4, S / 4],     P2 = [3 * S / 4, S / 4];
+  const P4 = [S / 4, 3 * S / 4], P3 = [3 * S / 4, 3 * S / 4];
+
+  const HOUSES = [
+    { no: 1,  pts: [MT, P2, C, P1], inner: C  }, // top kite
+    { no: 2,  pts: [TL, MT, P1],    inner: P1 },
+    { no: 3,  pts: [TL, P1, ML],    inner: P1 },
+    { no: 4,  pts: [ML, P1, C, P4], inner: C  }, // left kite
+    { no: 5,  pts: [BL, ML, P4],    inner: P4 },
+    { no: 6,  pts: [BL, P4, MB],    inner: P4 },
+    { no: 7,  pts: [MB, P4, C, P3], inner: C  }, // bottom kite
+    { no: 8,  pts: [BR, MB, P3],    inner: P3 },
+    { no: 9,  pts: [BR, P3, MR],    inner: P3 },
+    { no: 10, pts: [MR, P3, C, P2], inner: C  }, // right kite
+    { no: 11, pts: [TR, MR, P2],    inner: P2 },
+    { no: 12, pts: [TR, P2, MT],    inner: P2 },
+  ];
+
+  // Assign grahas to houses (by rasi, offset from the lagna rasi)
+  const houseContents = Array.from({ length: 13 }, () => []); // 1-indexed, [0] unused
+  for (const [key, g] of Object.entries(grahas)) {
+    const rasi = Math.floor(g.deg / 30);
+    const degInSign = (g.deg % 30).toFixed(0);
+    const houseNo = ((rasi - lagnaRasi + 12) % 12) + 1;
+    houseContents[houseNo].push({ key, degInSign, retro: g.retro });
+  }
+
+  const LINE = '#c9b98a';      // softer than the border, matching the reference chart's inner lines
+  const BORDER = '#1a1a1a';
+  const TEXT_RASI = '#8b0000';
+  const TEXT_MAIN = '#990000';
+  const TEXT_DEG  = '#cc2200';
+  const RETRO     = '#9a6b00';
+  const LAGNA_TEXT = '#5a3d99'; // Ascendant label gets its own color, matching the reference (violet)
+  const FILL_LAGNA = '#fff3dc';
+  const FILL_PLAIN = '#fffcf6';
+
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+  const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+  const scl = (a, s) => [a[0] * s, a[1] * s];
+  const norm = a => { const l = Math.hypot(a[0], a[1]) || 1; return [a[0] / l, a[1] / l]; };
+  const perp = a => [-a[1], a[0]];
+  const ptsAttr = pts => pts.map(p => p.join(',')).join(' ');
+  const centroid = pts => scl(pts.reduce((a, p) => add(a, p), [0, 0]), 1 / pts.length);
+
+  let cells = `<rect x="0" y="0" width="${S}" height="${S}" fill="${FILL_PLAIN}" stroke="${BORDER}" stroke-width="1.8" rx="2"/>`;
+
+  // Diamond edges + both full diagonals (drawn once -- matches the reference construction)
+  const structureLines = [
+    [MT, MR], [MR, MB], [MB, ML], [ML, MT], // diamond
+    [TL, BR], [BL, TR],                     // full diagonals
+  ];
+  for (const [a, b] of structureLines) {
+    cells += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${LINE}" stroke-width="1"/>`;
+  }
+
+  for (const h of HOUSES) {
+    const isLagna = h.no === 1;
+    if (isLagna) {
+      cells += `<polygon points="${ptsAttr(h.pts)}" fill="${FILL_LAGNA}"/>`;
+    }
+
+    const cen = centroid(h.pts);
+    const outward = norm(sub(cen, h.inner));   // direction from the shared inner vertex toward the roomy outer part
+    const spread = perp(outward);              // perpendicular axis, for laying out multiple grahas side by side
+
+    // Rasi number: nudged in from the shared inner vertex, toward the roomy interior
+    const rasiNo = ((lagnaRasi + h.no - 1) % 12) + 1;
+    const [nx, ny] = add(h.inner, scl(outward, S * 0.028));
+    cells += `<text x="${nx}" y="${ny}" text-anchor="middle" dominant-baseline="middle" font-size="9.5"
+      fill="${TEXT_RASI}" font-family="${FONT_SANS_SVG}" font-weight="600">${rasiNo}</text>`;
+
+    // Grahas: laid out on a small grid centered at the polygon's centroid --
+    // 2 per row along the spread axis, additional rows pushed further
+    // outward (away from the shared inner vertex, deeper into the house).
+    const contents = houseContents[h.no];
+    if (contents.length) {
+      const colGap = S * 0.09;
+      const rowGap = S * 0.065;
+      contents.forEach((g, i) => {
+        const col = i % 2, row = Math.floor(i / 2);
+        const colOffset = (col - (Math.min(contents.length, 2) - 1) / 2) * colGap;
+        const pos = add(add(cen, scl(spread, colOffset)), scl(outward, row * rowGap));
+        const glyphColor = g.key === 'as' ? LAGNA_TEXT : (g.retro ? RETRO : TEXT_MAIN);
+        const retroMark = g.retro
+          ? `<tspan font-size="7.5" dy="-2" fill="${RETRO}">℞</tspan>`
+          : '';
+        cells += `<text x="${pos[0]}" y="${pos[1]}" text-anchor="middle" dominant-baseline="middle" font-size="11.5"
+          fill="${glyphColor}" font-family="${FONT_SANS_SVG}" font-weight="700"
+          >${GRAHA_GLYPHS[g.key]}${retroMark}</text>`;
+        cells += `<text x="${pos[0]}" y="${pos[1] + 9}" text-anchor="middle" dominant-baseline="middle" font-size="7"
+          fill="${TEXT_DEG}" font-family="${FONT_SANS_SVG}">${g.degInSign}\u00b0</text>`;
+      });
+    }
+  }
+
+  return `<svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}" xmlns="http://www.w3.org/2000/svg">${cells}</svg>`;
+}
+
 // ─── LOCATION SEARCH ─────────────────────────────────────────────────────────
 const locInput = document.getElementById('locationInput');
 const locDropdown = document.getElementById('locDropdown');
@@ -3233,6 +4429,24 @@ document.addEventListener('click', e => {
 document.getElementById('settingsBtn').addEventListener('click', e => {
   e.stopPropagation();
   document.getElementById('settingsPanel').classList.toggle('open');
+});
+
+// ─── CHART STYLE TOGGLE (North / South Indian) ──────────────────────────────
+function updateChartStyleToggleUI() {
+  document.querySelectorAll('.chart-style-opt').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.style === state.chartStyle);
+  });
+}
+updateChartStyleToggleUI();
+document.querySelectorAll('.chart-style-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const style = btn.dataset.style;
+    if (style === state.chartStyle) return;
+    state.chartStyle = style;
+    updateChartStyleToggleUI();
+    try { localStorage.setItem('horadarpan_chart_style', style); } catch { /* localStorage unavailable */ }
+    if (window._drawRasiChart) window._drawRasiChart();
+  });
 });
 
 
@@ -3328,12 +4542,36 @@ function syncPanelHeight() {
   });
 }
 
+// ─── SCHEDULE BUTTON ──────────────────────────────────────────────────────────
+document.getElementById('scheduleBtn').addEventListener('click', toggleScheduleView);
+
+// ─── GOOGLE CALENDAR SYNC FILTER TOGGLE ──────────────────────────────────────
+(function _initGcalAppOnlyToggle() {
+  const cb = document.getElementById('gcalAppOnlyToggle');
+  if (!cb) return;
+  cb.checked = state.gcalAppOnlyFilter;
+  cb.addEventListener('change', () => {
+    state.gcalAppOnlyFilter = cb.checked;
+    try { localStorage.setItem('horadarpan_gcal_app_only', String(cb.checked)); } catch { /* localStorage unavailable */ }
+    // Re-fetch immediately under the new filter so the change is visible
+    // without waiting for the next poll/focus refresh.
+    _refreshGcalForCurrentView();
+  });
+})();
+
 // ─── TODAY BUTTON ─────────────────────────────────────────────────────────────
 document.getElementById('todayBtn').addEventListener('click', () => {
   const today = getNowAtLocation(state.location.tzOffset).dateObj;
   state.viewYear = today.getFullYear();
   state.viewMonth = today.getMonth();
   state.selectedDate = today;
+  // If the Schedule (agenda) view is open, drop back to the hora view for
+  // today — same as clicking a date label in the schedule panel.
+  if (state.viewMode === 'schedule') {
+    state.viewMode = 'hora';
+    const scheduleBtn = document.getElementById('scheduleBtn');
+    if (scheduleBtn) scheduleBtn.classList.remove('active');
+  }
   renderCalendar();
   syncPanelHeight();
   loadHoras();
@@ -3348,7 +4586,12 @@ document.getElementById('prevMonth').addEventListener('click', () => {
   renderCalendar();
   syncPanelHeight();
   refreshYogaDropdownIfOpen();
+  refreshTransitDropdownIfOpen();
   fetchMonthPanchanga(state.viewYear, state.viewMonth);
+  if (state.viewMode === 'schedule') {
+    renderScheduleView();
+    if (_gcalConnected) _loadGcalEventsForMonth(state.viewYear, state.viewMonth);
+  }
 });
 document.getElementById('nextMonth').addEventListener('click', () => {
   state.viewMonth++;
@@ -3356,7 +4599,12 @@ document.getElementById('nextMonth').addEventListener('click', () => {
   renderCalendar();
   syncPanelHeight();
   refreshYogaDropdownIfOpen();
+  refreshTransitDropdownIfOpen();
   fetchMonthPanchanga(state.viewYear, state.viewMonth);
+  if (state.viewMode === 'schedule') {
+    renderScheduleView();
+    if (_gcalConnected) _loadGcalEventsForMonth(state.viewYear, state.viewMonth);
+  }
 });
 
 // ─── EVENT POPUP ENGINE ───────────────────────────────────────────────────────
@@ -3463,25 +4711,50 @@ document.getElementById('popupClose').addEventListener('click', closePopup);
 document.getElementById('popupCancel').addEventListener('click', closePopup);
 document.getElementById('eventPopupOverlay').addEventListener('click', closePopup);
 
-document.getElementById('popupSave').addEventListener('click', () => {
+document.getElementById('popupSave').addEventListener('click', async () => {
   const title = document.getElementById('popupTitle').value.trim();
   if (!title) { document.getElementById('popupTitle').focus(); return; }
-  // Use _popupHoraStart as the reference so post-midnight times get the correct raw value
-  const startSec = timeInputToSec(document.getElementById('popupStartTime').value, _popupHoraStart);
-  const endSec   = timeInputToSec(document.getElementById('popupEndTime').value,   startSec);
-  const desc     = document.getElementById('popupDesc').value.trim();
+  const startSec  = timeInputToSec(document.getElementById('popupStartTime').value, _popupHoraStart);
+  const endSec    = timeInputToSec(document.getElementById('popupEndTime').value,   startSec);
+  const desc      = document.getElementById('popupDesc').value.trim();
+  const syncGcal  = _gcalConnected && document.getElementById('popupGcalToggle').checked;
   const ev = {
-    id:         Date.now().toString(36) + Math.random().toString(36).slice(2),
-    dateKey:    dateKey(state.selectedDate),
+    id:          Date.now().toString(36) + Math.random().toString(36).slice(2),
+    dateKey:     dateKey(state.selectedDate),
     startSec, endSec, title,
     description: desc,
-    color: _popupSelectedColor,
+    color:       _popupSelectedColor,
   };
   state.events.push(ev);
   saveEvents();
   closePopup();
   loadHoras();
   fetchSupabaseAstroData();
+
+  if (syncGcal) {
+    try {
+      const gcalId = await _gcalCreateEvent(ev);
+      ev.gcalId = gcalId;
+      ev.fromGcal = true;
+      saveEvents();
+      showToast('✓ Event saved to Google Calendar');
+    } catch (err) {
+      // Token may have expired — try once more after silent refresh
+      try {
+        await _requestToken('');
+        const gcalId = await _gcalCreateEvent(ev);
+        ev.gcalId = gcalId;
+        ev.fromGcal = true;
+        saveEvents();
+        showToast('✓ Event saved to Google Calendar');
+      } catch (err2) {
+        showToast('Saved locally — reconnect Calendar to sync');
+        console.warn('GCal create failed:', err2);
+      }
+    }
+  } else {
+    showToast('✓ Event saved locally');
+  }
 });
 
 // Click on hora rows to open popup (event delegation on table body)
@@ -3726,6 +4999,146 @@ function refreshYogaDropdownIfOpen() {
   if (yogaDropdown.classList.contains('open')) renderYogaDropdown();
 }
 
+// ─── TRANSIT DROPDOWN ─────────────────────────────────────────────────────────
+
+const transitBtn      = document.getElementById('transitBtn');
+const transitDropdown = document.getElementById('transitDropdown');
+const transitList     = document.getElementById('transitList');
+const transitMonthLbl = document.getElementById('transitMonthLabel');
+
+const GRAHA_DISPLAY_FE = {
+  Sun:     { skt: 'Sūrya',    color: '#c8700a' },
+  Moon:    { skt: 'Candra',   color: '#5a7ab8' },
+  Mercury: { skt: 'Budha',    color: '#2a7a2a' },
+  Venus:   { skt: 'Śukra',   color: '#2a6878' },
+  Mars:    { skt: 'Maṅgala', color: '#c03030' },
+  Jupiter: { skt: 'Guru',     color: '#7a4ab0' },
+  Saturn:  { skt: 'Śani',    color: '#5a5a8a' },
+  Rahu:    { skt: 'Rāhu',    color: '#7a5c3a' },
+};
+
+function renderTransitDropdown() {
+  const { viewYear: y, viewMonth: m } = state;
+  if (transitMonthLbl) transitMonthLbl.textContent = `${MONTH_NAMES[m]} ${y}`;
+
+  const transits = state.monthTransits ?? [];
+
+  if (!transits.length) {
+    transitList.innerHTML = `<div class="transit-none">${
+      state.monthPanchangaFetching.size ? 'Loading…' : 'No transits data available.'
+    }</div>`;
+    return;
+  }
+
+  const inRange = transits.filter(t => t.inRange);
+  const future  = transits.filter(t => !t.inRange);
+
+  let html = '';
+
+  if (inRange.length) {
+    html += `<table class="transit-table">
+      <thead><tr>
+        <th>Graha</th>
+        <th>Transit</th>
+        <th>Date</th>
+      </tr></thead>
+      <tbody>`;
+
+    for (const t of inRange) {
+      const g    = GRAHA_DISPLAY_FE[t.planet] ?? { skt: t.planet, color: '#888' };
+      const iso  = t.transitLocal ?? t.transitUTC;
+      const date = iso.slice(0, 10);           // "YYYY-MM-DD"
+      const [ty, tm, td] = date.split('-').map(Number);
+      const dow  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(ty, tm-1, td).getDay()];
+      const dateLabel = `${td} ${MONTH_NAMES[tm-1].slice(0,3)}, ${dow}`;
+
+      html += `<tr class="transit-in-range"
+        data-year="${ty}" data-month="${tm-1}" data-day="${td}">
+        <td>
+          <div class="transit-planet-cell">
+            <div class="transit-planet-dot" style="background:${g.color};"></div>
+            <span style="color:${g.color};">${g.skt}</span>
+          </div>
+        </td>
+        <td style="color:var(--text2);">
+          ${t.fromRasi} → <strong>${t.toRasi}</strong>
+        </td>
+        <td style="color:var(--text3); white-space:nowrap;">${dateLabel}</td>
+      </tr>`;
+    }
+    html += `</tbody></table>`;
+  } else {
+    html += `<div class="transit-none">No transits this month.</div>`;
+  }
+
+  if (future.length) {
+    html += `<div style="padding:6px 10px 3px; font-size:0.62rem; letter-spacing:0.07em;
+      text-transform:uppercase; color:var(--text3); font-weight:600; background:var(--bg2);
+      border-top:1px solid var(--bg3);">Next transits</div>
+    <table class="transit-table"><tbody>`;
+
+    // Show only one next transit per planet
+    const seenPlanets = new Set();
+    for (const t of future) {
+      if (seenPlanets.has(t.planet)) continue;
+      seenPlanets.add(t.planet);
+      const g   = GRAHA_DISPLAY_FE[t.planet] ?? { skt: t.planet, color: '#888' };
+      const iso = t.transitLocal ?? t.transitUTC;
+      const date = iso.slice(0, 10);
+      const [ty, tm, td] = date.split('-').map(Number);
+      html += `<tr class="transit-future">
+        <td>
+          <div class="transit-planet-cell">
+            <div class="transit-planet-dot" style="background:${g.color};"></div>
+            <span style="color:${g.color};">${g.skt}</span>
+          </div>
+        </td>
+        <td style="color:var(--text2);">${t.fromRasi} → <strong>${t.toRasi}</strong></td>
+        <td style="color:var(--text3); white-space:nowrap;">${td} ${MONTH_NAMES[tm-1].slice(0,3)}</td>
+      </tr>`;
+    }
+    html += `</tbody></table>`;
+  }
+
+  transitList.innerHTML = html;
+
+  // Wire in-range row clicks → select that date
+  transitList.querySelectorAll('tr.transit-in-range').forEach(row => {
+    row.addEventListener('click', () => {
+      state.selectedDate = new Date(
+        parseInt(row.dataset.year), parseInt(row.dataset.month), parseInt(row.dataset.day)
+      );
+      closeTransitDropdown();
+      renderCalendar();
+      loadHoras();
+      fetchSupabaseAstroData();
+    });
+  });
+}
+
+function openTransitDropdown() {
+  renderTransitDropdown();
+  transitDropdown.classList.add('open');
+  transitBtn.classList.add('open');
+}
+function closeTransitDropdown() {
+  transitDropdown.classList.remove('open');
+  transitBtn.classList.remove('open');
+}
+
+transitBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  transitDropdown.classList.contains('open') ? closeTransitDropdown() : openTransitDropdown();
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.transit-btn-wrap')) closeTransitDropdown();
+});
+
+function refreshTransitDropdownIfOpen() {
+  if (transitDropdown.classList.contains('open')) renderTransitDropdown();
+}
+
 // ─── MONTH PANCHANGA ENGINE ───────────────────────────────────────────────────
 // Fetches sunrise-evaluated panchanga for every day in a calendar month from
 // the month-panchanga-engine edge function. Populates state.panchangaCache in
@@ -3792,7 +5205,8 @@ async function fetchMonthPanchanga(year, month) {
         lng:           state.location.lng,
         ayanamsaSystem:state.ayanamsa,
         altitude:      state.location.altitude || 216,
-        utcOffsetStr
+        utcOffsetStr,
+        includeTransits: true
       })
     });
 
@@ -3801,8 +5215,15 @@ async function fetchMonthPanchanga(year, month) {
       throw new Error(errBody.error || `HTTP ${res.status}`);
     }
 
-    const data = await res.json(); // { "YYYY-MM-DD": { tithiIdx, tithiShort, nakShort, phase, sankranti, … } }
-    console.log(`[month-panchanga] ${monthKey}: ${Object.keys(data).length} days received`);
+    const data = await res.json();
+
+    // Extract transits (top-level _transits key) before merging per-day cache
+    if (Array.isArray(data._transits) && state.viewYear === year && state.viewMonth === month) {
+      state.monthTransits = data._transits;
+    }
+    delete data._transits; // remove before iterating date keys
+
+    console.log(`[month-panchanga] ${monthKey}: ${Object.keys(data).length} days, ${state.monthTransits.length} transits`);
 
     // Merge into panchangaCache — only write; never overwrite entries already
     // present with a _source:'server' tag (avoids a slower response from a
@@ -3813,10 +5234,11 @@ async function fetchMonthPanchanga(year, month) {
       }
     }
 
-    // Re-render calendar and yoga dropdown (if open) to reflect populated cache
+    // Re-render calendar and both dropdowns (if open) to reflect populated cache
     if (state.viewYear === year && state.viewMonth === month) {
       renderCalendar();
       refreshYogaDropdownIfOpen();
+      refreshTransitDropdownIfOpen();
     }
 
   } catch (err) {
